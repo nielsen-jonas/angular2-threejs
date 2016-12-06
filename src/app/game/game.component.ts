@@ -18,6 +18,7 @@ export class GameComponent implements OnInit {
   private windowWidth: number = 1280;
   private windowHeight: number = 720;
   private fps: number = 60;
+  private step: number = 1/this.fps;
 
   private cube: any;
   
@@ -43,14 +44,15 @@ export class GameComponent implements OnInit {
   }
 
   private render() {
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
+    this.cube.rotation.x += 1*this.step;
+    this.cube.rotation.y += 1*this.step;
 
     this.renderer.render(this.scene, this.camera);
   }
 
   public setFPS(fps: number) {
     this.fps = fps;
+    this.step = 1/this.fps;
     clearTimeout(this.intervalId);
     this.intervalId = setInterval(() => { this.render(); }, (1/this.fps)*1000);
   }
