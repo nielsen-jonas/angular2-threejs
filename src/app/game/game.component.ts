@@ -15,8 +15,8 @@ export class GameComponent implements OnInit {
   private camera: any;
   private renderer: any;
 
-  private windowWidth: number = 500;
-  private windowHeight: number = 500;
+  private windowWidth: number = 1280;
+  private windowHeight: number = 720;
   private fps: number = 60;
 
   private cube: any;
