@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 
 @Component({
   selector: 'tjsg-game',
@@ -22,6 +22,14 @@ export class GameComponent implements OnInit {
 
   private cube: any;
   
+  @HostListener('click', ['$event.target']) onClick(btn) {
+    console.log('button', btn, 'clicky');
+  }
+
+  @HostListener('window:keydown', ['$event']) onkeydown(key) {
+    console.log(key.key);
+  }
+
   constructor(el:ElementRef) { 
     this.hostElement = el;
   }
