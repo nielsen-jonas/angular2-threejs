@@ -58,6 +58,8 @@ export class GameComponent implements OnInit {
   public setSize(width: number, height: number) {
     this.windowWidth = width;
     this.windowHeight = height;
+    this.camera.aspect = this.windowWidth / this.windowHeight;
+    this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.windowWidth, this.windowHeight);
   }
 
