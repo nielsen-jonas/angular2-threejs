@@ -7,7 +7,7 @@ import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 })
 export class GameComponent implements OnInit {
 
-  private THREE: any = require("three-js")();
+  private THREE: any = require("three/build/three.min.js");
   private hostElement: ElementRef;
   private intervalId: any;
 
