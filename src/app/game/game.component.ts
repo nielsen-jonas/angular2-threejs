@@ -59,18 +59,22 @@ export class GameComponent implements OnInit {
   }
 
   public setFPS(fps: number) {
-    this.fps = fps;
-    this.step = 1/this.fps;
-    clearTimeout(this.intervalId);
-    this.intervalId = setInterval(() => { this.render(); }, (1/this.fps)*1000);
+      if (fps => 1 && fps <= 120) {
+          this.fps = fps;
+          this.step = 1/this.fps;
+          clearTimeout(this.intervalId);
+          this.intervalId = setInterval(() => { this.render(); }, (1/this.fps)*1000);
+      }
   }
 
   public setSize(width: number, height: number) {
-    this.windowWidth = width;
-    this.windowHeight = height;
-    this.camera.aspect = this.windowWidth / this.windowHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.windowWidth, this.windowHeight);
+      if (width >= 256 && height >= 256) {
+          this.windowWidth = width;
+          this.windowHeight = height;
+          this.camera.aspect = this.windowWidth / this.windowHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(this.windowWidth, this.windowHeight);
+      }
   }
 
   public setBgColor(color: string) {
