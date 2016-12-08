@@ -5,30 +5,41 @@ export class CannonService {
 
     private CANNON: any = require('cannon');
 
+    private world: any;
+
+    private radius: number;
+    private sphereBody: any;
+    private sphere2Body: any;
+
+    private groundBody: any;
+    private groundShape: any;
+
+  constructor() { }
+
+  public initialize() {
     // Setup our world
-    private world: any = new this.CANNON.World();
+    this.world = new this.CANNON.World();
 
     // Create sphere
-    private radius: number = 1 // m
-    private sphereBody: any = new this.CANNON.Body({
+    this.radius = 1 // m
+    this.sphereBody = new this.CANNON.Body({
         mass: 5, // Kg
         position: new this.CANNON.Vec3(-4, 0, 10),
         shape: new this.CANNON.Sphere(this.radius)
     });
-    private sphere2Body: any = new this.CANNON.Body({
+    this.sphere2Body = new this.CANNON.Body({
         mass: 5, // Kg
         position: new this.CANNON.Vec3(-16, 0, 10),
         shape: new this.CANNON.Sphere(this.radius)
     });
 
     // Create a plane
-    private groundBody: any = new this.CANNON.Body({
+    this.groundBody = new this.CANNON.Body({
         mass: 0 // mass == 0 makes the body static
     });
-    private groundShape: any = new this.CANNON.Plane();
-
-
-  constructor() { }
+    this.groundShape = new this.CANNON.Plane();
+      
+  }
 
   public makeLife() {
       this.world.addBody(this.sphereBody);

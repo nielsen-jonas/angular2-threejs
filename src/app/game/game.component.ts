@@ -30,6 +30,7 @@ export class GameComponent implements OnInit {
   }
 
   ngOnInit() {
+      this.cannon.initialize();
       this.cannon.makeLife();
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.three.initialize();
