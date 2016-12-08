@@ -2,7 +2,7 @@
   <input type="number" value="60" min="1" max="120" #fps>
   <button type="submit">Set FPS</button>
 </form>
-<form (ngSubmit)="setBgColor(color.value)">
+<form (ngSubmit)="this.three.setBgColor(color.value)">
   <input type="color" value="#DDF" #color>
   <button type="submit">Set bg-color</button>
 </form>
