@@ -1,9 +1,11 @@
 import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
+import { WindowService } from '../window.service';
 
 @Component({
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
-  styleUrls: ['./game.component.css']
+  styleUrls: ['./game.component.css'],
+  providers: [WindowService]
 })
 export class GameComponent implements OnInit {
 
@@ -40,9 +42,6 @@ export class GameComponent implements OnInit {
   private camera: any;
   private renderer: any;
 
-  private windowWidth: number = 1280;
-  private windowHeight: number = 720;
-  private aspectRatio: number = 16/9;
   private fps: number = 60;
   private step: number = 1/this.fps;
 
@@ -57,7 +56,7 @@ export class GameComponent implements OnInit {
   //  console.log(key.key);
   //}
 
-  constructor(el:ElementRef) { 
+  constructor(el: ElementRef, private window: WindowService) { 
     this.hostElement = el;
   }
 
@@ -72,11 +71,11 @@ export class GameComponent implements OnInit {
       this.world.gravity.set(0,0,0); // m/s^2
 
       /* /TESTING CANNON */
-      this.updateWindowSizeVars();
+      this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.scene = new this.THREE.Scene();
-      this.camera = new this.THREE.PerspectiveCamera( 45, this.windowWidth/this.windowHeight, 0.1, 1000);
+      this.camera = new this.THREE.PerspectiveCamera( 45, this.window.getAspect(), 0.1, 1000);
       this.renderer = new this.THREE.WebGLRenderer({ alpha: true });
-      this.renderer.setSize(this.windowWidth, this.windowHeight);
+      this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
       this.renderer.setClearColor('#DDF', 1);
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.renderer.domElement);
       this.renderer.clear();
@@ -100,11 +99,6 @@ export class GameComponent implements OnInit {
     this.renderer.render(this.scene, this.camera);
   }
  
-  private updateWindowSizeVars() {
-      this.windowWidth = this.hostElement.nativeElement.querySelector('#game-container').offsetWidth;
-      this.windowHeight = this.windowWidth/(this.aspectRatio);
-  }
-
   public setFPS(fps: number) {
       if (fps => 1 && fps <= 120) {
           this.fps = fps;
@@ -119,10 +113,9 @@ export class GameComponent implements OnInit {
   }
 
   public updateWindowSize() {
-      this.updateWindowSizeVars();
-      this.camera.aspect = this.windowWidth / this.windowHeight;
+      this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
+      this.camera.aspect = this.window.getAspect();
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(this.windowWidth, this.windowHeight);
+      this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
   }
-
 }
