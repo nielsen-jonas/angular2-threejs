@@ -2,12 +2,13 @@ import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 import { WindowService } from '../window.service';
 import { CannonService } from '../cannon.service';
 import { ThreeService } from '../three.service';
+import { SceneService } from '../scene.service';
 
 @Component({
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [WindowService, CannonService, ThreeService]
+  providers: [WindowService, CannonService, ThreeService, SceneService]
 })
 export class GameComponent implements OnInit {
 
@@ -25,23 +26,33 @@ export class GameComponent implements OnInit {
   //  console.log(key.key);
   //}
 
-  constructor(el: ElementRef, private window: WindowService, private cannon: CannonService, private three: ThreeService) { 
-    this.hostElement = el;
+  constructor(
+      el: ElementRef,
+      private window: WindowService,
+      private cannon: CannonService,
+      private three: ThreeService,
+      private scene: SceneService) {
+
+      this.hostElement = el;
   }
 
   ngOnInit() {
-      this.cannon.initialize();
-      this.cannon.makeLife();
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
+      this.cannon.initialize();
       this.three.initialize();
+      this.scene.createBasicSphere([0,0,16]);
+      this.scene.createBasicSphere([-8,0,16]);
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
-      this.three.makeLife();
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
 
   private tick() {
       this.cannon.step(this.step);
-      this.three.updatePos(this.cannon.getSphere(), this.cannon.getSphere2());
+      let objects = this.scene.getAllObjects();
+      for (let i = 0, len = objects.length; i < len; i++) {
+          let body = this.cannon.getBodyById(objects[i][0]);
+          this.three.updateMeshPos(objects[i][1],body.position);
+      }
       this.three.render();
   }
  
@@ -57,5 +68,9 @@ export class GameComponent implements OnInit {
   public onResize() {
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.three.updateWindowSize();
+  }
+
+  public testing() {
+      console.log('testing');
   }
 }
