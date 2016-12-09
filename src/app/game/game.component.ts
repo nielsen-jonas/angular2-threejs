@@ -3,12 +3,13 @@ import { WindowService } from '../window.service';
 import { CannonService } from '../cannon.service';
 import { ThreeService } from '../three.service';
 import { SceneService } from '../scene.service';
+import { GameService } from '../game.service';
 
 @Component({
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [WindowService, CannonService, ThreeService, SceneService]
+  providers: [WindowService, CannonService, ThreeService, SceneService, GameService]
 })
 export class GameComponent implements OnInit {
 
@@ -31,7 +32,8 @@ export class GameComponent implements OnInit {
       private window: WindowService,
       private cannon: CannonService,
       private three: ThreeService,
-      private scene: SceneService) {
+      private scene: SceneService,
+      private game: GameService) {
 
       this.hostElement = el;
   }
@@ -42,9 +44,7 @@ export class GameComponent implements OnInit {
       this.three.initialize();
       this.three.setCameraPosition(0,0,32);
       this.cannon.setGravity(0, -9.8, 0);
-      this.scene.createSphere([0,0,16]);
-      this.scene.createSphere([-8,0,16]);
-      this.scene.createSphere([8,0,16]);
+      this.game.initialize();
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
@@ -53,6 +53,7 @@ export class GameComponent implements OnInit {
       this.cannon.step(this.step);
       this.scene.update();
       this.three.render();
+      this.game.main();
   }
  
   public setFPS(fps: number) {
