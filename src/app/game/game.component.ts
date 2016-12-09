@@ -42,8 +42,6 @@ export class GameComponent implements OnInit {
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.cannon.initialize();
       this.three.initialize();
-      this.three.setCameraPosition(0,0,32);
-      this.cannon.setGravity(0, -9.8, 0);
       this.game.initialize();
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
