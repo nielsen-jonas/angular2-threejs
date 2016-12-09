@@ -1,15 +1,16 @@
-import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef } from '@angular/core';
 import { WindowService } from '../window.service';
 import { CannonService } from '../cannon.service';
 import { ThreeService } from '../three.service';
 import { SceneService } from '../scene.service';
 import { GameService } from '../game.service';
+import { InputService } from '../input.service';
 
 @Component({
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [WindowService, CannonService, ThreeService, SceneService, GameService]
+  providers: [WindowService, CannonService, ThreeService, SceneService, GameService, InputService]
 })
 export class GameComponent implements OnInit {
 
@@ -19,21 +20,14 @@ export class GameComponent implements OnInit {
   private fps: number = 60;
   private step: number = 1/this.fps;
 
-  //@HostListener('click', ['$event.target']) onClick(btn) {
-  //  console.log('button', btn, 'clicky');
-  //}
-
-  //@HostListener('window:keydown', ['$event']) onkeydown(key) {
-  //  console.log(key.key);
-  //}
-
   constructor(
       el: ElementRef,
       private window: WindowService,
       private cannon: CannonService,
       private three: ThreeService,
       private scene: SceneService,
-      private game: GameService) {
+      private game: GameService,
+      private input: InputService) {
 
       this.hostElement = el;
   }
@@ -52,6 +46,7 @@ export class GameComponent implements OnInit {
       this.scene.update();
       this.three.render();
       this.game.main();
+      this.input.update();
   }
  
   public setFPS(fps: number) {
