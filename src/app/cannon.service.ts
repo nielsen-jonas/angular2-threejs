@@ -17,8 +17,11 @@ export class CannonService {
   public initialize() {
     // Setup our world
     this.world = new this.CANNON.World();
-    this.world.gravity.set(0,0,-9);
   }
+
+  public setGravity(x: number = 0, y: number = 0, z: number = 0) {
+      this.world.gravity.set(x, y, z);
+  };
 
   public addBody(body: any) {
       this.bodies[body.id] = body;

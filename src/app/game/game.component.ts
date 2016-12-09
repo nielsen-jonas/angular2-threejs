@@ -40,19 +40,18 @@ export class GameComponent implements OnInit {
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.cannon.initialize();
       this.three.initialize();
-      this.scene.createBasicSphere([0,0,16]);
-      this.scene.createBasicSphere([-8,0,16]);
+      this.three.setCameraPosition(0,0,32);
+      this.cannon.setGravity(0, -9.8, 0);
+      this.scene.createSphere([0,0,16]);
+      this.scene.createSphere([-8,0,16]);
+      this.scene.createSphere([8,0,16]);
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
 
   private tick() {
       this.cannon.step(this.step);
-      let objects = this.scene.getAllObjects();
-      for (let i = 0, len = objects.length; i < len; i++) {
-          let body = this.cannon.getBodyById(objects[i][0]);
-          this.three.updateMeshPos(objects[i][1],body.position);
-      }
+      this.scene.update();
       this.three.render();
   }
  
@@ -73,4 +72,5 @@ export class GameComponent implements OnInit {
   public testing() {
       console.log('testing');
   }
+
 }

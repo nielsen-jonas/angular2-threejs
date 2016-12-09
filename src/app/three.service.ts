@@ -27,8 +27,13 @@ export class ThreeService {
         this.renderer = new this.THREE.WebGLRenderer({ alpha: true });
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
         this.renderer.setClearColor('#DDF', 1);
-        this.camera.position.z = 32; // TODO: Refactor camera configuration
         //this.renderer.clear();
+    }
+    
+    public setCameraPosition(x: number, y: number, z: number) {
+        this.camera.position.x = x;
+        this.camera.position.y = y;
+        this.camera.position.z = z;
     }
 
     public getDomElement() {

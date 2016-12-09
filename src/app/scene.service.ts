@@ -14,8 +14,15 @@ export class SceneService {
         this.CANNON = this.cannon.getCannon();
         this.THREE = this.three.getThree();
     }
-    
-    public createBasicSphere(position = [0,0,0], radius: number = 1, mass: number = 1) {
+
+    public update() {
+        for (let i = 0, len = this.objects.length; i < len; i++) {
+            let body = this.cannon.getBodyById(this.objects[i][0]);
+            this.three.updateMeshPos(this.objects[i][1], body.position);
+        }
+    }
+
+    public createSphere(position = [0,0,0], radius: number = 1, mass: number = 1) {
         // Cannon Body
         let body = new this.CANNON.Body({
             mass: mass,
@@ -37,26 +44,4 @@ export class SceneService {
         this.three.sceneAdd(sphere);
     };
   
-    public createSphere(position, mass: number, threeMaterial, cannonMaterial, color) {
-    };
-  
-    public getObjectById(id: number) {
-    };
-  
-    public getObjects(objects: number[]) {
-    };
-  
-    public getAllObjects() {
-        return this.objects;
-    };
-  
-    public deleteObjectById(id: number) {
-    };
-  
-    public deleteObjects(objects: number[]) {
-    };
-  
-    public clearScene() {
-    };
-
 }
