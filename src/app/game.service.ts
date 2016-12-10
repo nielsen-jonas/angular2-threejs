@@ -3,6 +3,7 @@ import { CannonService } from './cannon.service';
 import { ThreeService } from './three.service';
 import { SceneService } from './scene.service';
 import { InputService } from './input.service';
+import { MouseService } from './mouse.service';
 
 @Injectable()
 export class GameService {
@@ -11,7 +12,8 @@ export class GameService {
       private cannon: CannonService,
       private three: ThreeService,
       private scene: SceneService,
-      private input: InputService) { }
+      private input: InputService,
+      private mouse: MouseService) { }
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
@@ -34,6 +36,8 @@ export class GameService {
       if (this.input.getKey('right').isDown()){
           console.log('right');
       }
+
+      //this.mouse.logPos();
   }
 
 }

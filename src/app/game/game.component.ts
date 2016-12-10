@@ -5,12 +5,13 @@ import { ThreeService } from '../three.service';
 import { SceneService } from '../scene.service';
 import { GameService } from '../game.service';
 import { InputService } from '../input.service';
+import { MouseService } from '../mouse.service';
 
 @Component({
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [WindowService, CannonService, ThreeService, SceneService, GameService, InputService]
+  providers: [WindowService, CannonService, ThreeService, SceneService, GameService, InputService, MouseService]
 })
 export class GameComponent implements OnInit {
 
@@ -27,7 +28,8 @@ export class GameComponent implements OnInit {
       private three: ThreeService,
       private scene: SceneService,
       private game: GameService,
-      private input: InputService) {
+      private input: InputService,
+      private mouse: MouseService) {
 
       this.hostElement = el;
   }
@@ -38,6 +40,7 @@ export class GameComponent implements OnInit {
       this.three.initialize();
       this.game.initialize();
       this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
+      this.mouse.initialize(this.hostElement.nativeElement.querySelector('#game-container'));
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
 
