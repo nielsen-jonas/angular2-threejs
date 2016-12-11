@@ -24,7 +24,11 @@ export class GameService {
   }
 
   public main() {
-
+      if (this.mouse.pointerIsLocked()) {
+          this.cannon.run();
+      } else {
+          this.cannon.halt();
+      }
   }
 
 }

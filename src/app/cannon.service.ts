@@ -8,6 +8,8 @@ export class CannonService {
     private world: any;
     private bodies: any[] = [];
 
+    private running: boolean = false;
+
   constructor() { }
 
   public getCannon() {
@@ -37,7 +39,21 @@ export class CannonService {
   }
 
   public step(step: number) {
-      this.world.step(step);
+      if (this.running) {
+          this.world.step(step);
+      }
   };
+
+  public halt() {
+      this.running = false;
+  }
+
+  public run() {
+      this.running = true;
+  }
+
+  public isRunning() {
+      return this.running;
+  }
 
 }
