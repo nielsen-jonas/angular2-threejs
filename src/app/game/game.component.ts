@@ -15,7 +15,8 @@ import { MouseService } from '../mouse.service';
 })
 export class GameComponent implements OnInit {
 
-  private hostElement: ElementRef;
+  private elRef: ElementRef;
+  private element: any;
   private tickInterval: any;
 
   private fps: number = 60;
@@ -31,16 +32,17 @@ export class GameComponent implements OnInit {
       private input: InputService,
       private mouse: MouseService) {
 
-      this.hostElement = el;
+      this.elRef = el;
   }
 
   ngOnInit() {
-      this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
+      this.element = this.elRef.nativeElement.querySelector('#game-container');
+      this.window.initialize(this.element);
       this.cannon.initialize();
       this.three.initialize();
       this.game.initialize();
-      this.mouse.initialize(this.hostElement.nativeElement.querySelector('#game-container'));
-      this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
+      this.mouse.initialize(this.element);
+      this.element.appendChild(this.three.getDomElement());
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
 
@@ -63,7 +65,7 @@ export class GameComponent implements OnInit {
   }
 
   public onResize() {
-      this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
+      this.window.resize(this.element.offsetWidth);
       this.three.updateWindowSize();
       this.mouse.updateWindowSize();
   }
