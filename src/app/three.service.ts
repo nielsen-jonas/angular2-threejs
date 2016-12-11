@@ -12,9 +12,6 @@ export class ThreeService {
 
     private meshes: any[] = [];
 
-    private sphere: any;
-    private sphere2: any;
-
   constructor(private window: WindowService) { }
 
     public getThree() {
@@ -28,12 +25,29 @@ export class ThreeService {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
         this.renderer.setClearColor('#DDF', 1);
         //this.renderer.clear();
+        console.log('THREE CAMERA', this.camera);
     }
     
     public setCameraPosition(x: number, y: number, z: number) {
         this.camera.position.x = x;
         this.camera.position.y = y;
         this.camera.position.z = z;
+    }
+
+    public cameraRotateX(amount) {
+        this.camera.rotateY(-amount*0.0002);
+    }
+
+    public cameraRotateY(amount) {
+        this.camera.rotateX( -amount*0.0002);
+    } 
+
+    public cameraMoveForward(amount) {
+        this.camera.translateZ(-amount);
+    }
+
+    public cameraMoveSideways(amount) {
+        this.camera.translateX(amount);
     }
 
     public getDomElement() {

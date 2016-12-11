@@ -18,17 +18,51 @@ export class GameService {
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
       this.three.setCameraPosition(0,0,32);
-      this.scene.createSphere([-8,0,16]);
-      this.scene.createSphere([0,0,16]);
-      this.scene.createSphere([8,0,16]);
+      this.scene.createSphere([-8,10,0]);
+      this.scene.createSphere([0,10,0]);
+      this.scene.createSphere([0,20,0]);
+      this.scene.createSphere([0,30,0]);
+      this.scene.createSphere([0,50,0]);
+      this.scene.createSphere([1,80,0]);
+      
+      this.scene.createSphere([-10,100,0]);
+      this.scene.createSphere([5,200,0]);
+
+      this.scene.createSphere([-5,250,5]);
+      this.scene.createSphere([5,300,5]);
+      this.scene.createSphere([-2,400,2]);
+      this.scene.createSphere([1,410,3]);
+      
+      this.scene.createSphere([8,10,0]);
+      this.scene.createSphere([0,-50,0],40,0);
   }
 
   public main() {
-      if (this.mouse.pointerIsLocked()) {
-          this.cannon.run();
-      } else {
+
+      // Halt simulation until mousepointer is locked 
+      if (!this.mouse.pointerIsLocked()) {
           this.cannon.halt();
+          return 0;
       }
+      this.cannon.run();
+      ///////////////////////////////////////////////
+
+      // Camera controls
+      this.three.cameraRotateX(this.mouse.getMovementX());
+      this.three.cameraRotateY(this.mouse.getMovementY());
+       if (this.input.getKey('up').isDown()) {
+           this.three.cameraMoveForward(1);
+       }
+       if (this.input.getKey('down').isDown()) {
+           this.three.cameraMoveForward(-1);
+       }
+       if (this.input.getKey('left').isDown()) {
+           this.three.cameraMoveSideways(-1);
+       }
+       if (this.input.getKey('right').isDown()) {
+           this.three.cameraMoveSideways(1);
+       }
+
   }
 
 }
