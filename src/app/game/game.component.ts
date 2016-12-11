@@ -39,8 +39,8 @@ export class GameComponent implements OnInit {
       this.cannon.initialize();
       this.three.initialize();
       this.game.initialize();
-      this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
       this.mouse.initialize(this.hostElement.nativeElement.querySelector('#game-container'));
+      this.hostElement.nativeElement.querySelector('#game-container').appendChild(this.three.getDomElement());
       this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
   }
 
@@ -49,7 +49,8 @@ export class GameComponent implements OnInit {
       this.scene.update();
       this.three.render();
       this.game.main();
-      this.input.update();
+      this.input.flush();
+      this.mouse.flush();
   }
  
   public setFPS(fps: number) {
@@ -64,6 +65,7 @@ export class GameComponent implements OnInit {
   public onResize() {
       this.window.resize(this.hostElement.nativeElement.querySelector('#game-container').offsetWidth);
       this.three.updateWindowSize();
+      this.mouse.updateWindowSize();
   }
 
   public testing() {

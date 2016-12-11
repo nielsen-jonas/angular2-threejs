@@ -4,13 +4,13 @@ import { Injectable } from '@angular/core';
 export class InputService {
 
     private key = {
-        up: new keyState,
-        down: new keyState,
-        left: new keyState,
-        right: new keyState 
+        up: new KeyState,
+        down: new KeyState,
+        left: new KeyState,
+        right: new KeyState 
     }; 
 
-    constructor() {
+    constructor() { // TODO: Decouple from DOM
         window.addEventListener('keydown', (event) => {
             let key = event.key.toLowerCase();
             switch (key) {
@@ -56,11 +56,11 @@ export class InputService {
         });
     }
 
-    public update() {
-        this.key.up.update();
-        this.key.down.update();
-        this.key.left.update();
-        this.key.right.update();
+    public flush() {
+        this.key.up.flush();
+        this.key.down.flush();
+        this.key.left.flush();
+        this.key.right.flush();
     }
 
     public getKey(key) {
@@ -69,7 +69,7 @@ export class InputService {
 
 }
 
-export class keyState {
+export class KeyState {
     private keyPress: boolean = false;
     private keyDown: boolean = false;
     private keyRelease: boolean = false;
@@ -87,7 +87,7 @@ export class keyState {
         this.keyRelease = true;
     }
 
-    public update() {
+    public flush() {
         this.keyPress = false;
         this.keyRelease = false;
     }

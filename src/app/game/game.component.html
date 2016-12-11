@@ -2,8 +2,8 @@
   <input type="number" value="60" min="1" max="120" #fps>
   <button type="submit">Set FPS</button>
 </form>
-<button (click)="testing()">Testing</button>
-<div (window:resize)="onResize()" id="game-container"></div>
+<button (click)="this.mouse.requestPointerLock()">Lock Pointer</button>
+<div id="game-container" (window:resize)="onResize()"></div>
 <p>
   game works!
 </p>

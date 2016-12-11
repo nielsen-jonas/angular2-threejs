@@ -24,20 +24,7 @@ export class GameService {
   }
 
   public main() {
-      if (this.input.getKey('up').isDown()){
-          console.log('up');
-      }
-      if (this.input.getKey('down').isDown()){
-          console.log('down');
-      }
-      if (this.input.getKey('left').isDown()){
-          console.log('left');
-      }
-      if (this.input.getKey('right').isDown()){
-          console.log('right');
-      }
 
-      //this.mouse.logPos();
   }
 
 }
