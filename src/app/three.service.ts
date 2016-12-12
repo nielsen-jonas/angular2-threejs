@@ -35,11 +35,11 @@ export class ThreeService {
     }
 
     public cameraRotateX(amount) {
-        this.camera.rotateY(-amount*0.0002);
+        this.camera.rotateY(-amount*0.001);
     }
 
     public cameraRotateY(amount) {
-        this.camera.rotateX( -amount*0.0002);
+        this.camera.rotateX( -amount*0.001);
     } 
 
     public cameraMoveForward(amount) {
@@ -56,6 +56,10 @@ export class ThreeService {
 
     public getMeshes() {
         return this.meshes;
+    }
+
+    public getCamera() {
+        return this.camera;
     }
 
     public sceneAdd(mesh) {

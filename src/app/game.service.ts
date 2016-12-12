@@ -50,19 +50,29 @@ export class GameService {
       // Camera controls
       this.three.cameraRotateX(this.mouse.getMovementX());
       this.three.cameraRotateY(this.mouse.getMovementY());
-       if (this.input.getKey('up').isDown()) {
-           this.three.cameraMoveForward(1);
-       }
-       if (this.input.getKey('down').isDown()) {
-           this.three.cameraMoveForward(-1);
-       }
-       if (this.input.getKey('left').isDown()) {
-           this.three.cameraMoveSideways(-1);
-       }
-       if (this.input.getKey('right').isDown()) {
-           this.three.cameraMoveSideways(1);
-       }
-
+      if (this.input.getKey('up').isDown()) {
+          this.three.cameraMoveForward(2);
+      }
+      if (this.input.getKey('down').isDown()) {
+          this.three.cameraMoveForward(-2);
+      }
+      if (this.input.getKey('left').isDown()) {
+          this.three.cameraMoveSideways(-2);
+      }
+      if (this.input.getKey('right').isDown()) {
+          this.three.cameraMoveSideways(2);
+      }
+      let r = this.three.getCamera().getWorldRotation();
+      this.x = r.x;
+      this.z = r.z;
+      if (this.mouse.getButton('right').isPressed()) {
+          console.log('FABULOUSCAM', r.x + r.z);
+      }
   }
+
+  private x = 0;
+  private z = 0;
+  public getX(){return this.x;}
+  public getZ(){return this.z;}
 
 }
