@@ -18,9 +18,10 @@ export class GameService {
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
       this.three.setCameraPosition(0,0,32);
-      this.scene.createSphere([-8,10,0]);
-      this.scene.createSphere([0,10,0]);
-      this.scene.createSphere([0,20,0]);
+      this.scene.createSphere([-8,10,0], 2);
+      this.scene.createSphere([0,10,0], 2);
+      this.scene.createSphere([8,10,0], 2);
+      this.scene.createSphere([0,20,0], 4);
       this.scene.createSphere([0,30,0]);
       this.scene.createSphere([0,50,0]);
       this.scene.createSphere([1,80,0]);
@@ -32,9 +33,8 @@ export class GameService {
       this.scene.createSphere([5,300,5]);
       this.scene.createSphere([-2,400,2]);
       this.scene.createSphere([1,410,3]);
-      
-      this.scene.createSphere([8,10,0]);
-      this.scene.createSphere([0,-50,0],40,0);
+
+      this.scene.createSphere([0,-128,0],128,0);
   }
 
   public main() {

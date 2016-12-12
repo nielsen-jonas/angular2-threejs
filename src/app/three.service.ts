@@ -28,6 +28,11 @@ export class ThreeService {
         this.renderer.setClearColor('#DDF', 1);
         //this.renderer.clear();
         console.log('THREE CAMERA', this.camera);
+        let ambientLight = new this.THREE.AmbientLight( 0x404040 );
+        this.scene.add( ambientLight );
+        let directionalLight = new this.THREE.DirectionalLight( 0xfffffff, 0.5 );
+        directionalLight.position.set(1000,1000,1000);
+        this.scene.add( directionalLight );
     }
 
     public setStep(step: number) {
@@ -74,8 +79,9 @@ export class ThreeService {
         this.scene.add(mesh);
     }
 
-    public updateMeshPos(id, position) {
+    public updateMesh(id, position, quaternion) {
         this.meshes[id].position.copy(position);
+        this.meshes[id].quaternion.copy(quaternion);
     }
 
     public render() {

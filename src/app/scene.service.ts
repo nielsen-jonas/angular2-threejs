@@ -10,15 +10,22 @@ export class SceneService {
 
     private objects: any[] = [];
 
+    private textureLoader: any;
+    private textures: any[] = [];
+    private materials: any[] = [];
+
     constructor(private cannon: CannonService, private three: ThreeService) {
         this.CANNON = this.cannon.getCannon();
         this.THREE = this.three.getThree();
+        this.textureLoader = new this.THREE.TextureLoader();
+        this.textures.push(this.textureLoader.load('./assets/textures/sign_arrow.jpg'));
+        this.materials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures[0]});
     }
 
     public update() {
         for (let i = 0, len = this.objects.length; i < len; i++) {
             let body = this.cannon.getBodyById(this.objects[i][0]);
-            this.three.updateMeshPos(this.objects[i][1], body.position);
+            this.three.updateMesh(this.objects[i][1], body.position, body.quaternion);
         }
     }
 
@@ -31,17 +38,20 @@ export class SceneService {
         });
         
         // Three Mesh
-        let geometry = new this.THREE.SphereGeometry(radius, 8, 8);
-        let material = new this.THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        let sphere = new this.THREE.Mesh( geometry, material );
+        let geometry = new this.THREE.SphereGeometry(radius, 16, 16);
+        let mesh = new this.THREE.Mesh( geometry, this.materials['sign-arrow'] );
 
+        this.instantiate(body, mesh);
+    };
+
+    private instantiate(body, mesh) {
         // Register Object
-        let object = [body.id, sphere.id];
+        let object = [body.id, mesh.id];
         this.objects.push(object);
-        
+
         // Add Object
         this.cannon.addBody(body);
-        this.three.sceneAdd(sphere);
-    };
+        this.three.sceneAdd(mesh);
+    }
   
 }
