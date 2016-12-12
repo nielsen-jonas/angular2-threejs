@@ -40,6 +40,7 @@ export class GameComponent implements OnInit {
       this.window.initialize(this.element);
       this.cannon.initialize();
       this.three.initialize();
+      this.three.setStep(this.step);
       this.game.initialize();
       this.mouse.initialize(this.element);
       this.element.appendChild(this.three.getDomElement());
@@ -59,6 +60,7 @@ export class GameComponent implements OnInit {
       if (fps => 1 && fps <= 120) {
           this.fps = fps;
           this.step = 1/this.fps;
+          this.three.setStep(this.step);
           clearTimeout(this.tickInterval);
           this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
       }

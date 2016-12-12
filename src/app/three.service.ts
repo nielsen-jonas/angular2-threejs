@@ -11,6 +11,8 @@ export class ThreeService {
     private renderer: any;
 
     private meshes: any[] = [];
+    private step: number;
+    private camMoveSpd: number;
 
   constructor(private window: WindowService) { }
 
@@ -27,6 +29,11 @@ export class ThreeService {
         //this.renderer.clear();
         console.log('THREE CAMERA', this.camera);
     }
+
+    public setStep(step: number) {
+        this.step = step;
+        this.camMoveSpd = step * 6;
+    }
     
     public setCameraPosition(x: number, y: number, z: number) {
         this.camera.position.x = x;
@@ -35,19 +42,19 @@ export class ThreeService {
     }
 
     public cameraRotateX(amount) {
-        this.camera.rotateY(-amount*0.001);
+        this.camera.rotateY(-amount*0.002);
     }
 
     public cameraRotateY(amount) {
-        this.camera.rotateX( -amount*0.001);
+        this.camera.rotateX( -amount*0.002);
     } 
 
     public cameraMoveForward(amount) {
-        this.camera.translateZ(-amount);
+        this.camera.translateZ(-amount*this.camMoveSpd);
     }
 
     public cameraMoveSideways(amount) {
-        this.camera.translateX(amount);
+        this.camera.translateX(amount*this.camMoveSpd);
     }
 
     public getDomElement() {
