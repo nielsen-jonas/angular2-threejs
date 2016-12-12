@@ -18,9 +18,10 @@ export class GameService {
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
       this.three.setCameraPosition(0,0,32);
-      this.scene.createSphere([-8,10,0], 2);
-      this.scene.createSphere([0,10,0], 2);
-      this.scene.createSphere([8,10,0], 2);
+
+      this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
+      this.scene.createSphere([0,10,0], 2, 1, 'concrete-plaster');
+      this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
       this.scene.createSphere([0,20,0], 4);
       this.scene.createSphere([0,30,0]);
       this.scene.createSphere([0,50,0]);

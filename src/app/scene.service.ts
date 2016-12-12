@@ -20,6 +20,8 @@ export class SceneService {
         this.textureLoader = new this.THREE.TextureLoader();
         this.textures.push(this.textureLoader.load('./assets/textures/sign_arrow.jpg'));
         this.materials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures[0]});
+        this.textures.push(this.textureLoader.load('./assets/textures/concrete_plaster.jpg'));
+        this.materials['concrete-plaster'] = new this.THREE.MeshLambertMaterial({ map: this.textures[1]});
     }
 
     public update() {
@@ -29,7 +31,7 @@ export class SceneService {
         }
     }
 
-    public createSphere(position = [0,0,0], radius: number = 1, mass: number = 1) {
+    public createSphere(position = [0,0,0], radius: number = 1, mass: number = 1, material: string = 'sign-arrow') {
         // Cannon Body
         let body = new this.CANNON.Body({
             mass: mass,
@@ -39,7 +41,7 @@ export class SceneService {
         
         // Three Mesh
         let geometry = new this.THREE.SphereGeometry(radius, 16, 16);
-        let mesh = new this.THREE.Mesh( geometry, this.materials['sign-arrow'] );
+        let mesh = new this.THREE.Mesh( geometry, this.materials[material] );
 
         this.instantiate(body, mesh);
     };
