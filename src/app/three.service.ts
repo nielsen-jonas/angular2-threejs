@@ -97,6 +97,14 @@ export class ThreeService {
         return this.camera;
     }
 
+    public getCameraPosition() {
+        return this.camera.getWorldPosition();
+    }
+    
+    public getCameraDirection() {
+        return this.camera.getWorldDirection();
+    }
+
     public sceneAdd(mesh) {
         this.meshes[mesh.id] = mesh;
         this.scene.add(mesh);

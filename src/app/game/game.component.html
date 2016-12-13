@@ -1,17 +1,7 @@
-<form (ngSubmit)="setFPS(fps.value)">
-  <input type="number" value="30" min="1" max="120" #fps>
-  <button type="submit">Set FPS</button>
-</form>
 <div id="game-container" (window:resize)="onResize()" (click)="this.mouse.requestPointerLock()"></div>
-<p>
-  game works!
-</p>
-<p>
-    x: {{this.game.getX()}} 
-</p>
-<p>
-    y: {{this.game.getY()}}
-</p>
-<p>
-    z: {{this.game.getZ()}}
-</p>
+<form>
+    <label><input (click)="setFPS(15)" type="radio" name="framerate" value="15">15 fps</label>
+    <label><input (click)="setFPS(30)" type="radio" name="framerate" value="30" checked>30 fps</label>
+    <label><input (click)="setFPS(60)" type="radio" name="framerate" value="60">60 fps</label>
+    <label><input (click)="setFPS(120)" type="radio" name="framerate" value="120">120 fps</label>
+</form>

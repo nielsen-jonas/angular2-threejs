@@ -8,6 +8,9 @@ import { MouseService } from './mouse.service';
 @Injectable()
 export class GameService {
 
+    private camPos;
+    private camDir;
+
   constructor(
       private cannon: CannonService,
       private three: ThreeService,
@@ -74,27 +77,18 @@ export class GameService {
           this.three.cameraMoveSideways(2);
       }
 
-      let cam = this.three.getCamera();
-      let p = cam.getWorldPosition();
-      let v = cam.getWorldDirection();
-      this.x = p.x;
-      this.y = p.y;
-      this.z = p.z;
+      this.camPos = this.three.getCameraPosition();
+      this.camDir = this.three.getCameraDirection();
+      ////////////////////////////////////////////////
+
       
       if (this.mouse.getButton('left').isPressed()) {
           this.scene.createSphere({
-              position: [p.x, p.y, p.z],
-              velocity: [40*v.x, 40*v.y, 40*v.z] 
+              position: [this.camPos.x, this.camPos.y, this.camPos.z],
+              velocity: [40*this.camDir.x, 40*this.camDir.y, 40*this.camDir.z] 
           });
       }
 
   }
-
-  private x = 0;
-  private y = 0;
-  private z = 0;
-  public getX(){return this.x;}
-  public getY(){return this.y;}
-  public getZ(){return this.z;}
 
 }
