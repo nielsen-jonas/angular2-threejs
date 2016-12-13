@@ -8,32 +8,38 @@ export class ThreeService {
 
     private scene: any;
     private camera: any;
+    private camPitchObj: any;
     private renderer: any;
 
     private meshes: any[] = [];
     private step: number;
     private camMoveSpd: number;
 
-  constructor(private window: WindowService) { }
+  constructor(private window: WindowService) {
+        this.scene = new this.THREE.Scene();
+        this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
+        this.renderer.setClearColor('#DDF', 1);
+        this.renderer.autoclear = true;
+        let ambientLight = new this.THREE.AmbientLight( 0x404040 );
+        this.scene.add( ambientLight );
+        let directionalLight = new this.THREE.DirectionalLight( 0xfffffff, 0.5 );
+        directionalLight.position.set(800,800,800);
+        //this.loadSkybox();
+        this.scene.add( directionalLight );
+  
+  }
 
     public getThree() {
         return this.THREE;
     }
     
     public initialize() {
-        this.scene = new this.THREE.Scene();
-        this.camera = new this.THREE.PerspectiveCamera( 45, this.window.getAspect(), 0.1, 1000);
-        this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
-        this.renderer.setClearColor('#DDF', 1);
-        this.renderer.clear();
-        console.log('THREE CAMERA', this.camera);
-        let ambientLight = new this.THREE.AmbientLight( 0x404040 );
-        this.scene.add( ambientLight );
-        let directionalLight = new this.THREE.DirectionalLight( 0xfffffff, 0.5 );
-        directionalLight.position.set(1000,1000,1000);
-        this.loadSkybox();
-        this.scene.add( directionalLight );
+        this.camera = new this.THREE.PerspectiveCamera( 45, this.window.getAspect(), 0.1, 1000);
+        this.camPitchObj = new this.THREE.Object3D();
+        this.camPitchObj.add(this.camera);
+        this.scene.add(this.camPitchObj);
+        //console.log('THREE CAMERA', this.camera);
     }
 
     public setStep(step: number) {
@@ -42,25 +48,32 @@ export class ThreeService {
     }
     
     public setCameraPosition(x: number, y: number, z: number) {
-        this.camera.position.x = x;
-        this.camera.position.y = y;
-        this.camera.position.z = z;
+        this.camPitchObj.position.x = x;
+        this.camPitchObj.position.y = y;
+        this.camPitchObj.position.z = z;
     }
 
-    public cameraRotateX(amount) {
-        this.camera.rotateY(-amount*0.002);
+    public cameraYaw(amount) {
+        this.camPitchObj.rotateY(-amount*0.002);
     }
 
-    public cameraRotateY(amount) {
+    public cameraPitch(amount) {
         this.camera.rotateX( -amount*0.002);
+        if (this.camera.rotation.x > 1.4) {
+            this.camera.rotation.x = 1.4;
+        }
+        if (this.camera.rotation.x < -1.4) {
+            this.camera.rotation.x = -1.4;
+        }
     } 
 
     public cameraMoveForward(amount) {
-        this.camera.translateZ(-amount*this.camMoveSpd);
+        this.camPitchObj.translateZ(-amount*this.camMoveSpd);
+        this.camPitchObj.translateY(amount*this.camera.rotation.x*this.camMoveSpd);
     }
 
     public cameraMoveSideways(amount) {
-        this.camera.translateX(amount*this.camMoveSpd);
+        this.camPitchObj.translateX(amount*this.camMoveSpd);
     }
 
     public getDomElement() {
@@ -108,35 +121,24 @@ export class ThreeService {
             urlPrefix + 'negy.jpg',
             urlPrefix + 'posz.jpg',
             urlPrefix + 'negz.jpg'];
-        let textureCube = new this.THREE.CubeTextureLoader().load( urls );
-        textureCube.mapping = this.THREE.CubeRefractionMapping;
+        //let textureCube = new this.THREE.CubeTextureLoader().load( urls );
+        //textureCube.mapping = this.THREE.CubeRefractionMapping;
 
-        // material samples
-        let cubeMaterial3 = new this.THREE.MeshBasicMaterial({ color: 0xccddff, envMap: textureCube, refractionRatio: 0.98, reflectivity: 0.9 });
-        let cubeMaterial2 = new this.THREE.MeshBasicMaterial({ color: 0xccfffd, envMap: textureCube, refractionRatio: 0.985 });
-        let cubeMaterial1 = new this.THREE.MeshBasicMaterial({ color: 0xffffff, envMap: textureCube, refractionRatio: 0.98 });
+        let textureCube = this.THREE.ImageUtils.loadTextureCube(urls, this.THREE.CubeRefractionMapping);
+        let shader = this.THREE.ShaderLib.cube;
+        shader.uniforms.tCube.value = textureCube;
 
-        //
-        //let loader = new this.THREE.BinaryLoader();
-        /*
-        let shader = this.THREE.ShaderLib["cube"];
-        let uniforms = this.THREE.UniformsUtils.clone( shader.uniforms );
-        uniforms['tCube'].texture = textureCube;
-        //shader.uniforms['tCube'].value = textureCube;
         let material = new this.THREE.ShaderMaterial({
             fragmentShader: shader.fragmentShader,
-            vertextShader: shader.vertexShader,
-            uniforms: uniforms
+            vertexShader: shader.vertexShader,
+            uniforms: shader.uniforms,
+            depthWrite: false,
+            side: this.THREE.BackSide
         });
 
-        let geometry = new this.THREE.BoxGeometry(100, 100, 100);
-        let skybox = new this.THREE.Mesh(geometry, material);
+        let mesh = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), material);
+        this.scene.add(mesh);
 
-        this.scene.add( skybox );
-        */
-
-        //let sphere = new this.THREE.Mesh(geometry, material)
-        //this.scene.add(sphere);
     }
 
 }

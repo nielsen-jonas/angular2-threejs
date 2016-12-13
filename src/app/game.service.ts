@@ -19,21 +19,21 @@ export class GameService {
       this.cannon.setGravity(0,-9.8,0);
       this.three.setCameraPosition(0,0,32);
 
-      this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
+      // this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
       this.scene.createSphere([0,10,0], 2, 1, 'concrete-plaster');
-      this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
+      // this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
       this.scene.createSphere([0,20,0], 4);
-      this.scene.createSphere([0,30,0]);
-      this.scene.createSphere([0,50,0]);
-      this.scene.createSphere([1,80,0]);
-      
-      this.scene.createSphere([-10,100,0]);
-      this.scene.createSphere([5,200,0]);
+      // this.scene.createSphere([0,30,0]);
+      // this.scene.createSphere([0,50,0]);
+      // this.scene.createSphere([1,80,0]);
+      // 
+      // this.scene.createSphere([-10,100,0]);
+      // this.scene.createSphere([5,200,0]);
 
-      this.scene.createSphere([-5,250,5]);
-      this.scene.createSphere([5,300,5]);
-      this.scene.createSphere([-2,400,2]);
-      this.scene.createSphere([1,410,3]);
+      // this.scene.createSphere([-5,250,5]);
+      // this.scene.createSphere([5,300,5]);
+      // this.scene.createSphere([-2,400,2]);
+      // this.scene.createSphere([1,410,3]);
 
       this.scene.createSphere([0,-128,0],128,0);
   }
@@ -49,8 +49,8 @@ export class GameService {
       ///////////////////////////////////////////////
 
       // Camera controls
-      this.three.cameraRotateX(this.mouse.getMovementX());
-      this.three.cameraRotateY(this.mouse.getMovementY());
+      this.three.cameraYaw(this.mouse.getMovementX());
+      this.three.cameraPitch(this.mouse.getMovementY());
       if (this.input.getKey('up').isDown()) {
           this.three.cameraMoveForward(2);
       }
@@ -63,17 +63,17 @@ export class GameService {
       if (this.input.getKey('right').isDown()) {
           this.three.cameraMoveSideways(2);
       }
-      let r = this.three.getCamera().getWorldRotation();
-      this.x = r.x;
-      this.z = r.z;
-      if (this.mouse.getButton('right').isPressed()) {
-          console.log('FABULOUSCAM', r.x + r.z);
-      }
+      let p = this.three.getCamera().getWorldPosition();
+      this.x = p.x;
+      this.y = p.y;
+      this.z = p.z;
   }
 
   private x = 0;
+  private y = 0;
   private z = 0;
   public getX(){return this.x;}
+  public getY(){return this.y;}
   public getZ(){return this.z;}
 
 }
