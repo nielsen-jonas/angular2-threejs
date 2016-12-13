@@ -20,9 +20,15 @@ export class GameService {
       this.three.setCameraPosition(0,0,32);
 
       // this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
-      this.scene.createSphere([0,10,0], 2, 1, 'concrete-plaster');
+      this.scene.createSphere({
+          position: [0,10,0],
+          radius: 2,
+          mass: 1,
+          material: 'concrete-plaster'});
       // this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
-      this.scene.createSphere([0,20,0], 4);
+      this.scene.createSphere({
+          position: [0,20,0],
+          radius: 4});
       // this.scene.createSphere([0,30,0]);
       // this.scene.createSphere([0,50,0]);
       // this.scene.createSphere([1,80,0]);
@@ -35,7 +41,10 @@ export class GameService {
       // this.scene.createSphere([-2,400,2]);
       // this.scene.createSphere([1,410,3]);
 
-      this.scene.createSphere([0,-128,0],128,0);
+      this.scene.createSphere({
+          position: [0,-128,0],
+          radius: 128,
+          mass: 0});
   }
 
   public main() {
@@ -63,10 +72,21 @@ export class GameService {
       if (this.input.getKey('right').isDown()) {
           this.three.cameraMoveSideways(2);
       }
-      let p = this.three.getCamera().getWorldPosition();
+
+      let cam = this.three.getCamera();
+      let p = cam.getWorldPosition();
+      let v = cam.getWorldDirection();
       this.x = p.x;
       this.y = p.y;
       this.z = p.z;
+      
+      if (this.mouse.getButton('left').isPressed()) {
+          this.scene.createSphere({
+              position: [p.x, p.y, p.z],
+              velocity: [40*v.x, 40*v.y, 40*v.z] 
+          });
+      }
+
   }
 
   private x = 0;

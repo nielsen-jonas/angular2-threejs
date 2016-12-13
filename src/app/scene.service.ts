@@ -31,17 +31,24 @@ export class SceneService {
         }
     }
 
-    public createSphere(position = [0,0,0], radius: number = 1, mass: number = 1, material: string = 'sign-arrow') {
+    public createSphere(conf) {
+        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
+        if (typeof conf.radius == 'undefined') { conf.radius = 1 };
+        if (typeof conf.mass == 'undefined') { conf.mass = 1 };
+        if (typeof conf.material == 'undefined') { conf.material = 'sign-arrow' };
+        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
+
         // Cannon Body
         let body = new this.CANNON.Body({
-            mass: mass,
-            position: new this.CANNON.Vec3(position[0], position[1], position[2]),
-            shape: new this.CANNON.Sphere(radius)
+            mass: conf.mass,
+            position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
+            shape: new this.CANNON.Sphere(conf.radius),
+            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2])
         });
         
         // Three Mesh
-        let geometry = new this.THREE.SphereGeometry(radius, 16, 16);
-        let mesh = new this.THREE.Mesh( geometry, this.materials[material] );
+        let geometry = new this.THREE.SphereGeometry(conf.radius, 16, 16);
+        let mesh = new this.THREE.Mesh( geometry, this.materials[conf.material] );
 
         this.instantiate(body, mesh);
     };
