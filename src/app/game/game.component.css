@@ -31,3 +31,7 @@ label {
     letter-spacing: .4em;
     color: rgba(0,0,0,.4);
 }
+
+dl {
+    margin: 2em 0;
+}

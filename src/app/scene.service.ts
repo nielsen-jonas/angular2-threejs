@@ -56,6 +56,9 @@ export class SceneService {
         this.instantiate(body, mesh);
     };
 
+    private removeObject(bodyId) {
+    }
+
     private instantiate(body, mesh) {
         // Register Object
         let object = [body.id, mesh.id];

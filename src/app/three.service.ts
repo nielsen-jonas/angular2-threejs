@@ -110,6 +110,10 @@ export class ThreeService {
         this.scene.add(mesh);
     }
 
+    public removeMesh(id) {
+        //this.scene.remove(this.mesh);
+    }
+
     public updateMesh(id, position, quaternion) {
         this.meshes[id].position.copy(position);
         this.meshes[id].quaternion.copy(quaternion);
