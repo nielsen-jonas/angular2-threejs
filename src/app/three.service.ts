@@ -11,6 +11,8 @@ export class ThreeService {
     private camPitchObj: any;
     private renderer: any;
 
+    private running: boolean = false;
+
     private meshes: any[] = [];
     private skyBox: any;
     private step: number;
@@ -18,6 +20,7 @@ export class ThreeService {
 
     private cubeTextureLoader: any;
     private skyboxReloadTimer: number = 0;
+    private skyboxNeedsReload: boolean = true;
 
   constructor(private window: WindowService) {
         this.scene = new this.THREE.Scene();
@@ -30,11 +33,24 @@ export class ThreeService {
         this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
         this.skyboxReloadTimer = 10;
         this.scene.add( directionalLight );
+        this.run();
   
   }
 
     public getThree() {
         return this.THREE;
+    }
+
+    public run() {
+        this.running = true;
+    }
+
+    public halt() {
+        this.running = false;
+    }
+
+    public isRunning() {
+        return this.running;
     }
     
     public initialize() {
@@ -123,8 +139,12 @@ export class ThreeService {
     }
 
     public render() {
-        this.renderer.render(this.scene, this.camera);
-        this.checkSkyboxReload();
+        if (this.running) {
+            this.renderer.render(this.scene, this.camera);
+            if (this.skyboxNeedsReload) {
+                this.checkSkyboxReload();
+            }
+        }
     }
 
     private checkSkyboxReload() {
@@ -145,6 +165,7 @@ export class ThreeService {
         this.camera.aspect = this.window.getAspect();
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
+        this.skyboxNeedsReload = true;
         this.skyboxReloadTimer = 10;
     }
 
@@ -177,6 +198,7 @@ export class ThreeService {
 
         this.skyBox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), material);
         this.scene.add(this.skyBox);
+        this.skyboxNeedsReload = false;
     }
 
 }

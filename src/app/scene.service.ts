@@ -9,6 +9,7 @@ export class SceneService {
     private THREE: any;
 
     private objects: any[] = [];
+    private objectCount: number = 0;
 
     private textureLoader: any;
     private textures: any[] = [];
@@ -29,6 +30,10 @@ export class SceneService {
             let body = this.cannon.getBodyById(this.objects[i][0]);
             this.three.updateMesh(this.objects[i][1], body.position, body.quaternion);
         }
+    }
+
+    public getObjectCount() {
+        return this.objectCount;
     }
 
     public createRectangle(conf) {
@@ -63,6 +68,7 @@ export class SceneService {
         // Register Object
         let object = [body.id, mesh.id];
         this.objects.push(object);
+        this.objectCount ++;
 
         // Add Object
         this.cannon.addBody(body);

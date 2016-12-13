@@ -56,9 +56,11 @@ export class GameService {
       // Halt simulation until mousepointer is locked 
       if (!this.mouse.pointerIsLocked()) {
           this.cannon.halt();
+          this.three.halt();
           return 0;
       }
       this.cannon.run();
+      this.three.run();
       ///////////////////////////////////////////////
 
       // Camera controls

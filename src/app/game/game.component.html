@@ -5,17 +5,17 @@
         <p id="author">2016 Jonas Nielsen</p>
     </div>
 </div>
-<form>
+<form tooltipPlacement="bottom" tooltip="Tip: Downsizing the browser window can greatly increase performance">
     <label><input (click)="setFPS(15)" type="radio" name="framerate" value="15">15 fps</label>
     <label><input (click)="setFPS(30)" type="radio" name="framerate" value="30" checked>30 fps</label>
     <label><input (click)="setFPS(60)" type="radio" name="framerate" value="60">60 fps</label>
     <label><input (click)="setFPS(120)" type="radio" name="framerate" value="120">120 fps</label>
 </form>
 <p>
-    ticks: {{this.getTicks()}}
+    objects: {{this.scene.getObjectCount()}}
 </p>
 <dl>
-    <dt>SkyBox</dt>
+    <dt>Skybox</dt>
     <dd>Ice River by <a target="_blank" href="http://www.humus.name/">Emil Persson, aka Humus</a></dd>
     <dt>Textures</dt>
     <dd><a target="_blank" href="https://freestocktextures.com/">freestocktextures.com</a></dd>
