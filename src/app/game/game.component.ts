@@ -22,6 +22,8 @@ export class GameComponent implements OnInit {
   private fps: number = 30;
   private step: number = 1/this.fps;
 
+  private ticks: number = 0;
+
   constructor(
       el: ElementRef,
       private window: WindowService,
@@ -54,7 +56,12 @@ export class GameComponent implements OnInit {
       this.game.main();
       this.input.flush();
       this.mouse.flush();
+      this.ticks ++;
   }
+
+  public getTicks() {
+      return this.ticks;
+  };
  
   public setFPS(fps: number) {
       if (fps => 1 && fps <= 120) {

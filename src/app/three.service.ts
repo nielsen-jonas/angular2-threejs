@@ -16,16 +16,19 @@ export class ThreeService {
     private step: number;
     private camMoveSpd: number;
 
+    private cubeTextureLoader: any;
+    private skyboxReloadTimer: number = 0;
+
   constructor(private window: WindowService) {
         this.scene = new this.THREE.Scene();
         this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
-        this.renderer.setClearColor('#DDF', 1);
         this.renderer.autoclear = true;
         let ambientLight = new this.THREE.AmbientLight( 0x707070 );
         this.scene.add( ambientLight );
         let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
         directionalLight.position.set(1000,286,-162);
-        this.loadSkybox();
+        this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
+        this.skyboxReloadTimer = 10;
         this.scene.add( directionalLight );
   
   }
@@ -121,6 +124,17 @@ export class ThreeService {
 
     public render() {
         this.renderer.render(this.scene, this.camera);
+        this.checkSkyboxReload();
+    }
+
+    private checkSkyboxReload() {
+        if (this.skyboxReloadTimer >= 1) {
+            this.skyboxReloadTimer --;
+            if (this.skyboxReloadTimer == 1) {
+                this.skyboxReloadTimer = 0;
+                this.refreshSkybox();
+            }
+        }
     }
 
     public setBgColor(color: string) {
@@ -131,8 +145,12 @@ export class ThreeService {
         this.camera.aspect = this.window.getAspect();
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
+        this.skyboxReloadTimer = 10;
+    }
+
+    public refreshSkybox() {
         this.scene.remove(this.skyBox);
-        this.scene.add(this.skyBox);
+        this.loadSkybox();
     }
 
     private loadSkybox() {
@@ -144,10 +162,8 @@ export class ThreeService {
             urlPrefix + 'negy.jpg',
             urlPrefix + 'posz.jpg',
             urlPrefix + 'negz.jpg'];
-        //let textureCube = new this.THREE.CubeTextureLoader().load( urls );
-        //textureCube.mapping = this.THREE.CubeRefractionMapping;
 
-        let textureCube = this.THREE.ImageUtils.loadTextureCube(urls, this.THREE.CubeRefractionMapping);
+        let textureCube = this.cubeTextureLoader.load(urls);
         let shader = this.THREE.ShaderLib.cube;
         shader.uniforms.tCube.value = textureCube;
 
