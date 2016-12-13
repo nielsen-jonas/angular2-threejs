@@ -1,4 +1,10 @@
-<div id="game-container" (window:resize)="onResize()" (click)="this.mouse.requestPointerLock()"></div>
+<alert dismissible="true">Click in the window to start the game, press <kbd>esc</kbd> at any time to pause/exit</alert>
+<div id="game-container" (window:resize)="onResize()" (click)="this.mouse.requestPointerLock()">
+    <div id="overlay">
+        <div id="crosshair">&#x268b;</div>
+        <p id="author">2016 Jonas Nielsen</p>
+    </div>
+</div>
 <form>
     <label><input (click)="setFPS(15)" type="radio" name="framerate" value="15">15 fps</label>
     <label><input (click)="setFPS(30)" type="radio" name="framerate" value="30" checked>30 fps</label>

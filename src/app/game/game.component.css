@@ -1,8 +1,33 @@
 #game-container {
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin: 2em 0;
+    position: relative;
 }
 
 label {
     padding-right: 1em;
+}
+
+#crosshair {
+    position: absolute;
+    top: 50%;
+    bottom: 50%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 1.4em;
+    color: rgba(0,0,0,.4);
+    margin: -1em 0 0;
+    padding: 0;
+}
+
+#author {
+    position: absolute;
+    bottom: 1.4em;
+    left: 0;
+    right: 0;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: .7em;
+    letter-spacing: .4em;
+    color: rgba(0,0,0,.4);
 }

@@ -31,6 +31,9 @@ export class SceneService {
         }
     }
 
+    public createRectangle(conf) {
+    }
+
     public createSphere(conf) {
         if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
         if (typeof conf.radius == 'undefined') { conf.radius = 1 };
