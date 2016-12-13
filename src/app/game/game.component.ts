@@ -19,7 +19,7 @@ export class GameComponent implements OnInit {
   private element: any;
   private tickInterval: any;
 
-  private fps: number = 60;
+  private fps: number = 30;
   private step: number = 1/this.fps;
 
   constructor(

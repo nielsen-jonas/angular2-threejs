@@ -24,7 +24,7 @@ export class GameService {
           position: [0,10,0],
           radius: 2,
           mass: 1,
-          material: 'concrete-plaster'});
+          material: 'concrete'});
       // this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
       this.scene.createSphere({
           position: [0,20,0],
@@ -44,7 +44,8 @@ export class GameService {
       this.scene.createSphere({
           position: [0,-128,0],
           radius: 128,
-          mass: 0});
+          mass: 0,
+          material: 'concrete'});
   }
 
   public main() {

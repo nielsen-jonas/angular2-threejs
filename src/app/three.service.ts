@@ -12,6 +12,7 @@ export class ThreeService {
     private renderer: any;
 
     private meshes: any[] = [];
+    private skyBox: any;
     private step: number;
     private camMoveSpd: number;
 
@@ -20,11 +21,11 @@ export class ThreeService {
         this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
         this.renderer.setClearColor('#DDF', 1);
         this.renderer.autoclear = true;
-        let ambientLight = new this.THREE.AmbientLight( 0x404040 );
+        let ambientLight = new this.THREE.AmbientLight( 0x707070 );
         this.scene.add( ambientLight );
-        let directionalLight = new this.THREE.DirectionalLight( 0xfffffff, 0.5 );
-        directionalLight.position.set(800,800,800);
-        //this.loadSkybox();
+        let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
+        directionalLight.position.set(1000,286,-162);
+        this.loadSkybox();
         this.scene.add( directionalLight );
   
   }
@@ -70,10 +71,18 @@ export class ThreeService {
     public cameraMoveForward(amount) {
         this.camPitchObj.translateZ(-amount*this.camMoveSpd);
         this.camPitchObj.translateY(amount*this.camera.rotation.x*this.camMoveSpd);
+        this.updateSkyBoxPosition();
     }
 
     public cameraMoveSideways(amount) {
         this.camPitchObj.translateX(amount*this.camMoveSpd);
+        this.updateSkyBoxPosition();
+    }
+
+    public updateSkyBoxPosition() {
+        this.skyBox.position.x = this.camPitchObj.position.x;
+        this.skyBox.position.y = this.camPitchObj.position.y;
+        this.skyBox.position.z = this.camPitchObj.position.z;
     }
 
     public getDomElement() {
@@ -110,6 +119,8 @@ export class ThreeService {
         this.camera.aspect = this.window.getAspect();
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
+        this.scene.remove(this.skyBox);
+        this.scene.add(this.skyBox);
     }
 
     private loadSkybox() {
@@ -136,9 +147,8 @@ export class ThreeService {
             side: this.THREE.BackSide
         });
 
-        let mesh = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), material);
-        this.scene.add(mesh);
-
+        this.skyBox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), material);
+        this.scene.add(this.skyBox);
     }
 
 }

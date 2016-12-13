@@ -20,8 +20,8 @@ export class SceneService {
         this.textureLoader = new this.THREE.TextureLoader();
         this.textures.push(this.textureLoader.load('./assets/textures/sign_arrow.jpg'));
         this.materials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures[0]});
-        this.textures.push(this.textureLoader.load('./assets/textures/concrete_plaster.jpg'));
-        this.materials['concrete-plaster'] = new this.THREE.MeshLambertMaterial({ map: this.textures[1]});
+        this.textures.push(this.textureLoader.load('./assets/textures/concrete.jpg'));
+        this.materials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures[1]});
     }
 
     public update() {
