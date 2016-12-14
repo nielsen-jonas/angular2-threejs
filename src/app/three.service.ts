@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+
 import { WindowService } from './window.service';
 
 @Injectable()
@@ -14,13 +15,10 @@ export class ThreeService {
     private running: boolean = false;
 
     private meshes: any[] = [];
-    private skyBox: any;
     private step: number;
     private camMoveSpd: number;
 
-    private cubeTextureLoader: any;
-    private skyboxReloadTimer: number = 0;
-    private skyboxNeedsReload: boolean = true;
+    private skybox: Skybox;
 
   constructor(private window: WindowService) {
         this.scene = new this.THREE.Scene();
@@ -30,8 +28,7 @@ export class ThreeService {
         this.scene.add( ambientLight );
         let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
         directionalLight.position.set(1000,286,-162);
-        this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
-        this.skyboxReloadTimer = 10;
+        this.skybox = new Skybox(this.THREE);
         this.scene.add( directionalLight );
         this.run();
   
@@ -59,7 +56,8 @@ export class ThreeService {
         this.camPitchObj = new this.THREE.Object3D();
         this.camPitchObj.add(this.camera);
         this.scene.add(this.camPitchObj);
-        //console.log('THREE CAMERA', this.camera);
+        this.skybox.load();
+        this.scene.add(this.skybox.getSkybox());
     }
 
     public setStep(step: number) {
@@ -90,18 +88,14 @@ export class ThreeService {
     public cameraMoveForward(amount) {
         this.camPitchObj.translateZ(-amount*this.camMoveSpd);
         this.camPitchObj.translateY(amount*this.camera.rotation.x*this.camMoveSpd);
-        this.updateSkyBoxPosition();
+          let pos = this.camPitchObj.position;
+          this.skybox.updatePosition(pos.x, pos.y, pos.z);
     }
 
     public cameraMoveSideways(amount) {
         this.camPitchObj.translateX(amount*this.camMoveSpd);
-        this.updateSkyBoxPosition();
-    }
-
-    public updateSkyBoxPosition() {
-        this.skyBox.position.x = this.camPitchObj.position.x;
-        this.skyBox.position.y = this.camPitchObj.position.y;
-        this.skyBox.position.z = this.camPitchObj.position.z;
+          let pos = this.camPitchObj.position;
+          this.skybox.updatePosition(pos.x, pos.y, pos.z);
     }
 
     public getDomElement() {
@@ -129,8 +123,9 @@ export class ThreeService {
         this.scene.add(mesh);
     }
 
-    public removeMesh(id) {
-        //this.scene.remove(this.mesh);
+    public sceneRemove(id) {
+        this.scene.remove(this.meshes[id]);
+        delete this.meshes[id];
     }
 
     public updateMesh(id, position, quaternion) {
@@ -141,19 +136,6 @@ export class ThreeService {
     public render() {
         if (this.running) {
             this.renderer.render(this.scene, this.camera);
-            if (this.skyboxNeedsReload) {
-                this.checkSkyboxReload();
-            }
-        }
-    }
-
-    private checkSkyboxReload() {
-        if (this.skyboxReloadTimer >= 1) {
-            this.skyboxReloadTimer --;
-            if (this.skyboxReloadTimer == 1) {
-                this.skyboxReloadTimer = 0;
-                this.refreshSkybox();
-            }
         }
     }
 
@@ -165,40 +147,57 @@ export class ThreeService {
         this.camera.aspect = this.window.getAspect();
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
-        this.skyboxNeedsReload = true;
-        this.skyboxReloadTimer = 10;
+        this.skybox.load();
     }
 
-    public refreshSkybox() {
-        this.scene.remove(this.skyBox);
-        this.loadSkybox();
-    }
+}
 
-    private loadSkybox() {
-        let urlPrefix = "./assets/cubemap/ice_river/";
-        let urls = [
-            urlPrefix + 'posx.jpg',
-            urlPrefix + 'negx.jpg',
-            urlPrefix + 'posy.jpg',
-            urlPrefix + 'negy.jpg',
-            urlPrefix + 'posz.jpg',
-            urlPrefix + 'negz.jpg'];
+export class Skybox {
+    private THREE;
+    private skybox: any;
+    private cubeTextureLoader: any;
+    
+    private urlPrefix = "./assets/cubemap/ice_river/";
+    private urls = [
+        this.urlPrefix + 'posx.jpg',
+        this.urlPrefix + 'negx.jpg',
+        this.urlPrefix + 'posy.jpg',
+        this.urlPrefix + 'negy.jpg',
+        this.urlPrefix + 'posz.jpg',
+        this.urlPrefix + 'negz.jpg'];
 
-        let textureCube = this.cubeTextureLoader.load(urls);
-        let shader = this.THREE.ShaderLib.cube;
-        shader.uniforms.tCube.value = textureCube;
+    private textureCube: any;
+    private shader: any;
+    private material: any;
 
-        let material = new this.THREE.ShaderMaterial({
-            fragmentShader: shader.fragmentShader,
-            vertexShader: shader.vertexShader,
-            uniforms: shader.uniforms,
+    public constructor(THREE) {
+        this.THREE = THREE 
+        this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
+        this.textureCube = this.cubeTextureLoader.load(this.urls);
+        this.shader = this.THREE.ShaderLib.cube;
+        this.shader.uniforms.tCube.value = this.textureCube;
+        this.material = new this.THREE.ShaderMaterial({
+            fragmentShader: this.shader.fragmentShader,
+            vertexShader: this.shader.vertexShader,
+            uniforms: this.shader.uniforms,
             depthWrite: false,
             side: this.THREE.BackSide
         });
 
-        this.skyBox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), material);
-        this.scene.add(this.skyBox);
-        this.skyboxNeedsReload = false;
+    }
+
+    public getSkybox() {
+        return this.skybox;
+    }
+
+    public updatePosition(x, y, z) {
+        this.skybox.position.x = x;
+        this.skybox.position.y = y;
+        this.skybox.position.z = z;
+    }
+
+    public load() {
+        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), this.material);
     }
 
 }
