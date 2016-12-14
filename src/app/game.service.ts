@@ -10,6 +10,7 @@ export class GameService {
 
     private camPos;
     private camDir;
+    private bodies;
 
   constructor(
       private cannon: CannonService,
@@ -82,7 +83,17 @@ export class GameService {
 
       this.camPos = this.camera.getCameraPosition();
       this.camDir = this.camera.getCameraDirection();
+      this.bodies = this.cannon.getBodies();
       ////////////////////////////////////////////////
+
+      // delete fallen objects
+      for (let i = 0, len = this.bodies.length; i < len; i++) {
+          if (typeof this.bodies[i] !== 'undefined') {
+              if (this.bodies[i].position.y < -1000) {
+                  this.scene.removeObjectByBodyId(i);
+              }
+          }
+      }
 
       
       if (this.mouse.getButton('left').isPressed()) {
@@ -93,7 +104,10 @@ export class GameService {
       }
 
       if(this.mouse.getButton('right').isPressed()) {
-          this.scene.removeObjectByBodyId(5);
+          this.scene.createSphere({
+              position: [this.camPos.x, this.camPos.y, this.camPos.z],
+              velocity: [120*this.camDir.x, 120*this.camDir.y, 120*this.camDir.z]
+          });
       }
 
   }
