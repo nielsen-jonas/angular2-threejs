@@ -61,18 +61,69 @@ export class SceneService {
         this.instantiate(body, mesh);
     };
 
-    private removeObject(bodyId) {
+    // public getObjectByBodyId(id) {
+    //     for (let i = 0, len = this.objects.length; i < len; i++) {
+    //         if (this.objects[i][0] === id) {
+    //             return this.objects[i];
+    //         }
+    //     }
+    // }
+    // 
+    // public getObjectByMeshId(id) {
+    //     for (let i = 0, len = this.objects.length; i < len; i++) {
+    //         if (this.objects[i][1] === id) {
+    //             return this.objects[i];
+    //         }
+    //     }
+    // }
+
+    private getObjectIndexByBodyId(id) {
+        for (let i = 0, len = this.objects.length; i < len; i++) {
+            if (this.objects[i][0] === id) {
+                return i;
+            }
+        }
+    }
+
+    private getObjectIndexByMeshId(id) {
+        for (let i = 0, len = this.objects.length; i < len; i++) {
+            if (this.objects[i][1] === id) {
+                return i;
+            }
+        }
+    }
+
+    public removeObjectByBodyId(id) {
+        let index = this.getObjectIndexByBodyId(id);
+        this.removeObject(index);
+    }
+    
+    public removeObjectByMeshId(id) {
+        let index = this.getObjectIndexByMeshId(id);
+        this.removeObject(index);
+    }
+
+    private removeObject(index) {
+        let object = this.objects[index];
+        if (object) {
+            this.cannon.removeBody(object[0]);
+            this.three.removeMesh(object[1]);
+            this.objects.splice(index, 1);
+            this.objectCount --;
+            return true;
+        }
+        return false;
     }
 
     private instantiate(body, mesh) {
-        // Register Object
-        let object = [body.id, mesh.id];
-        this.objects.push(object);
-        this.objectCount ++;
+       // Register Object
+       let object = [body.id, mesh.id];
+       this.objects.push(object);
+       this.objectCount ++;
 
-        // Add Object
-        this.cannon.addBody(body);
-        this.three.addMesh(mesh);
-    }
+       // Add Object
+       this.cannon.addBody(body);
+       this.three.addMesh(mesh);
+   }
   
 }

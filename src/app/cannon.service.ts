@@ -38,6 +38,11 @@ export class CannonService {
       return this.bodies[id];
   }
 
+  public removeBody(id) {
+      this.world.removeBody(this.bodies[id]);
+      delete this.bodies[id];
+  }
+
   public step(step: number) {
       if (this.running) {
           this.world.step(step);

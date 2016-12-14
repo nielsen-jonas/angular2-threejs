@@ -92,6 +92,10 @@ export class GameService {
           });
       }
 
+      if(this.mouse.getButton('right').isPressed()) {
+          this.scene.removeObjectByBodyId(5);
+      }
+
   }
 
 }

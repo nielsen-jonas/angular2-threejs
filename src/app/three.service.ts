@@ -141,6 +141,10 @@ export class ThreeService {
         return this.meshes;
     }
 
+    public getMeshById(id) {
+        return this.meshes[id];
+    }
+
     public addMesh(mesh) {
         this.meshes[mesh.id] = mesh;
         this.scene.add(mesh);
