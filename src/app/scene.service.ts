@@ -72,7 +72,7 @@ export class SceneService {
 
         // Add Object
         this.cannon.addBody(body);
-        this.three.sceneAdd(mesh);
+        this.three.addMesh(mesh);
     }
   
 }

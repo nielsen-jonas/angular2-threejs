@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CannonService } from './cannon.service';
-import { ThreeService } from './three.service';
+import { ThreeService, Camera } from './three.service';
 import { SceneService } from './scene.service';
 import { InputService } from './input.service';
 import { MouseService } from './mouse.service';
@@ -14,13 +14,14 @@ export class GameService {
   constructor(
       private cannon: CannonService,
       private three: ThreeService,
+      private camera: Camera,
       private scene: SceneService,
       private input: InputService,
       private mouse: MouseService) { }
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
-      this.three.setCameraPosition(0,0,32);
+      this.camera.setCameraPosition(0,0,32);
 
       // this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
       this.scene.createSphere({
@@ -64,23 +65,23 @@ export class GameService {
       ///////////////////////////////////////////////
 
       // Camera controls
-      this.three.cameraYaw(this.mouse.getMovementX());
-      this.three.cameraPitch(this.mouse.getMovementY());
+      this.camera.cameraYaw(this.mouse.getMovementX());
+      this.camera.cameraPitch(this.mouse.getMovementY());
       if (this.input.getKey('up').isDown()) {
-          this.three.cameraMoveForward(2);
+          this.camera.cameraMoveForward(2);
       }
       if (this.input.getKey('down').isDown()) {
-          this.three.cameraMoveForward(-2);
+          this.camera.cameraMoveForward(-2);
       }
       if (this.input.getKey('left').isDown()) {
-          this.three.cameraMoveSideways(-2);
+          this.camera.cameraMoveSideways(-2);
       }
       if (this.input.getKey('right').isDown()) {
-          this.three.cameraMoveSideways(2);
+          this.camera.cameraMoveSideways(2);
       }
 
-      this.camPos = this.three.getCameraPosition();
-      this.camDir = this.three.getCameraDirection();
+      this.camPos = this.camera.getCameraPosition();
+      this.camDir = this.camera.getCameraDirection();
       ////////////////////////////////////////////////
 
       
