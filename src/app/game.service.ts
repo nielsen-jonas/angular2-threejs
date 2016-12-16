@@ -103,10 +103,10 @@ export class GameService {
           });
       }
 
-      if(this.mouse.getButton('right').isPressed()) {
+      if(this.mouse.getButton('right').isDown()) {
           this.scene.createSphere({
               position: [this.camPos.x, this.camPos.y, this.camPos.z],
-              velocity: [120*this.camDir.x, 120*this.camDir.y, 120*this.camDir.z]
+              velocity: [1200*this.camDir.x, 1200*this.camDir.y, 1200*this.camDir.z]
           });
       }
 

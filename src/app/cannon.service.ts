@@ -43,9 +43,9 @@ export class CannonService {
       delete this.bodies[id];
   }
 
-  public step(step: number) {
+  public step(fixedTimeStep: number, timeSinceLastCalled: number) {
       if (this.running) {
-          this.world.step(step);
+          this.world.step(fixedTimeStep, timeSinceLastCalled);
       }
   };
 

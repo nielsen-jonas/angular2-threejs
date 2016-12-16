@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ElementRef, NgZone } from '@angular/core';
 import { WindowService } from '../window.service';
 import { CannonService } from '../cannon.service';
 import { ThreeService, Camera } from '../three.service';
@@ -17,15 +17,21 @@ export class GameComponent implements OnInit {
 
   private elRef: ElementRef;
   private element: any;
-  private tickInterval: any;
+  //private tickInterval: any;
 
   private fps: number = 30;
   private step: number = 1/this.fps;
 
   private ticks: number = 0;
+  private tickDelta: number;
+  private tickLast: number;
+
+  private avgFps: AvgFps = new AvgFps;
+
 
   constructor(
       el: ElementRef,
+      private zone: NgZone,
       private window: WindowService,
       private cannon: CannonService,
       private camera: Camera,
@@ -48,32 +54,51 @@ export class GameComponent implements OnInit {
       this.game.initialize();
       this.mouse.initialize(this.element);
       this.element.appendChild(this.three.getDomElement());
-      this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
+      //this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
+      this.requestTick();
   }
 
-  private tick() {
-      this.cannon.step(this.step);
-      this.scene.update();
-      this.three.render();
-      this.game.main();
-      this.input.flush();
-      this.mouse.flush();
-      this.ticks ++;
+  private requestTick() {
+      this.zone.runOutsideAngular(() => {
+         requestAnimationFrame((timestamp) => {
+             this.tick(timestamp);
+         }); 
+      });
+  };
+
+  private tick(timestamp) {
+      this.requestTick();
+      if (typeof this.tickLast != 'undefined') {
+          this.tickDelta = timestamp - this.tickLast;
+          this.fps = 1000/this.tickDelta;
+          this.step = 1/this.fps;
+          
+          this.camera.setStep(this.step);
+          
+          this.cannon.step(this.step, this.tickDelta/1000);
+          this.scene.update();
+          this.three.render();
+          this.game.main();
+          this.input.flush();
+          this.mouse.flush();
+          this.avgFps.update(this.fps, this.step);
+          this.ticks ++;
+      }
+      this.tickLast = timestamp;
   }
 
   public getTicks() {
       return this.ticks;
   };
  
-  public setFPS(fps: number) {
-      if (fps => 1 && fps <= 120) {
-          this.fps = fps;
-          this.step = 1/this.fps;
-          this.camera.setStep(this.step);
-          clearTimeout(this.tickInterval);
-          this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
-      }
+  public getFps() {
+      return this.fps;
   }
+
+  public getFpsFiltered() {
+      return Math.round(this.avgFps.getFps());
+  }
+
 
   public onResize() {
       this.window.resize(this.element.offsetWidth);
@@ -86,4 +111,30 @@ export class GameComponent implements OnInit {
       console.log('testing');
   }
 
+}
+
+export class AvgFps {
+    private fps: number = 0;
+    private buffer: number[] = [];
+    private refreshTime: number = 2;
+    private count: number = this.refreshTime;
+
+    public getFps() {
+        return this.fps;
+    }
+    
+    public update(fps, step) {
+        if (this.count <= 0) {
+            let sum = 0;
+            for(let i = 0; i < this.buffer.length; i++) {
+                sum += this.buffer[i];
+            }
+            this.fps = sum/this.buffer.length;
+            this.buffer = [];
+            this.count = this.refreshTime;
+        } else {
+            this.buffer.push(fps);
+            this.count -= step;
+        }
+    }
 }
