@@ -81,6 +81,9 @@ export class Camera {
 
     public updateWindowSize() {
         this.camera.updateProjectionMatrix();
+    }
+
+    public reloadSkybox() {
         this.skybox.load();
     }
 
@@ -197,17 +200,6 @@ export class Skybox {
     public constructor(THREE) {
         this.THREE = THREE 
         this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
-        this.textureCube = this.cubeTextureLoader.load(this.urls);
-        this.shader = this.THREE.ShaderLib.cube;
-        this.shader.uniforms.tCube.value = this.textureCube;
-        this.material = new this.THREE.ShaderMaterial({
-            fragmentShader: this.shader.fragmentShader,
-            vertexShader: this.shader.vertexShader,
-            uniforms: this.shader.uniforms,
-            depthWrite: false,
-            side: this.THREE.BackSide
-        });
-
     }
 
     public getSkybox() {
@@ -221,6 +213,17 @@ export class Skybox {
     }
 
     public load() {
+        this.textureCube = this.cubeTextureLoader.load(this.urls);
+        this.shader = this.THREE.ShaderLib.cube;
+        this.shader.uniforms.tCube.value = this.textureCube;
+        this.material = new this.THREE.ShaderMaterial({
+            fragmentShader: this.shader.fragmentShader,
+            vertexShader: this.shader.vertexShader,
+            uniforms: this.shader.uniforms,
+            depthWrite: false,
+            side: this.THREE.BackSide
+        });
+
         this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), this.material);
     }
 

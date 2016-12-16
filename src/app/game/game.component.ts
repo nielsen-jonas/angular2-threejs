@@ -27,6 +27,7 @@ export class GameComponent implements OnInit {
   private tickLast: number;
 
   private avgFps: AvgFps = new AvgFps;
+  private resized: boolean = false;
 
 
   constructor(
@@ -99,12 +100,22 @@ export class GameComponent implements OnInit {
       return Math.round(this.avgFps.getFps());
   }
 
-
   public onResize() {
       this.window.resize(this.element.offsetWidth);
       this.camera.updateWindowSize();
       this.three.updateWindowSize();
       this.mouse.updateWindowSize();
+      this.resized = true;
+  }
+
+  public onClick() {
+      if (!this.mouse.pointerIsLocked()) {
+          this.mouse.requestPointerLock();
+          if (this.resized) {
+              this.camera.reloadSkybox();
+              this.resized = false;
+          }
+      }
   }
 
   public testing() {

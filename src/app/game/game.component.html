@@ -1,5 +1,5 @@
 <alert dismissible="true">Click in the window to start the game, press <kbd>esc</kbd> at any time to pause/exit</alert>
-<div id="game-container" (window:resize)="onResize()" (click)="this.mouse.requestPointerLock()">
+<div id="game-container" (window:resize)="onResize()" (click)="onClick()">
     <div id="crosshair">&#x268b;</div>
     <p id="author" class="hidden-xs">2016 Jonas Nielsen</p>
 </div>
