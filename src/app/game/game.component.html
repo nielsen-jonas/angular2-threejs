@@ -3,8 +3,30 @@
     <div id="crosshair">&#x268b;</div>
     <p id="author" class="hidden-xs">2016 Jonas Nielsen</p>
 </div>
-<p>FPS: <span [ngClass]="{'text-danger': getFpsFiltered() < 30}">{{ getFpsFiltered() }}</span></p>
-<p>Objects: {{scene.getObjectCount()}}</p>
+<div class="row">
+    <div class="col-xs-8">
+        <p>FPS: <var [ngClass]="{'text-danger': getFpsFiltered() < 30}">{{ getFpsFiltered() }}</var></p>
+        <p>Objects: <var>{{scene.getObjectCount()}}</var></p>
+    </div>
+
+    <div class="col-xs-4">
+        <progressbar [animate]="false" [max]="10" [value]="game.getCharge()"></progressbar>
+    </div>
+</div>
+
+<dl>
+    <dt>Movement</dt>
+    <dd>
+        <kbd>A</kbd>
+        <kbd>W</kbd>
+        <kbd>S</kbd>
+        <kbd>D</kbd>
+    </dd>
+    <dt>Fire</dt>
+    <dd>
+        <kbd>Left mb</kbd>
+    </dd>
+</dl>
 
 <dl>
     <dt>Skybox</dt>

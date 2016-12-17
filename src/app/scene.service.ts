@@ -26,26 +26,49 @@ export class SceneService {
         this.textureLoader = new this.THREE.TextureLoader();
         this.textures['sign-arrow'] = this.textureLoader.load('./assets/textures/sign_arrow.jpg');
         this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
-
+        
         this.cannonMaterials['generic'] = new this.CANNON.Material();
+        this.cannonMaterials['concrete'] = new this.CANNON.Material();
+        this.cannonMaterials['soccer-ball'] = new this.CANNON.Material();
+
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
 
-        this.materials['sign-arrow'] = [];
-        this.materials['concrete'] = [];
-        this.materials['sign-arrow'] = new Material;
-        this.materials['sign-arrow'].setThreeMaterial('sign-arrow');
+        this.materials['soccer-ball'] = new Material;
+        this.materials['soccer-ball'].setWeight(.45);
+        this.materials['soccer-ball'].setCannonMaterial('soccer-ball');
+        this.materials['soccer-ball'].setThreeMaterial('sign-arrow');
         this.materials['concrete'] = new Material;
-        this.materials['concrete'].setDensity(2515);
+        this.materials['concrete'].setDensity(25.15);
+        this.materials['concrete'].setCannonMaterial('concrete');
         this.materials['concrete'].setThreeMaterial('concrete');
-
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['generic'], this.cannonMaterials['generic'], {
-            friction: 0.8,
-            restitution: 0.0
+        
+        // Concrete vs concrete
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['concrete'], {
+            friction: 0.02,
+            restitution: 0.0,
         }));
-        this.cannonContactMaterials[0].contactEquationStiffness = 1e8;
-        this.cannonContactMaterials[0].contactEquationRegularizationTime = 3;
-        this.cannon.addContactMaterial(this.cannonContactMaterials[0]);
+
+        // Soccer ball vs soccer ball
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['soccer-ball'], {
+            friction: 0.04,
+            restitution: 0.4
+        }));
+        
+        // Concrete vs soccer ball
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['soccer-ball'], {
+            friction: 0.04,
+            restitution: 0.4
+        }));
+
+        // Tune contacts
+        for (let i = 0, len = this.cannonContactMaterials.length; i < len; i++) {
+            this.cannonContactMaterials[i].contactEquationStiffness = 1e8;
+            this.cannonContactMaterials[i].contactEquationRegularizationTime = 1; // Larger value => softer contact
+        }
+        
+        // Send contacts to cannon
+        this.addContactMaterials(this.cannonContactMaterials);
     }
 
     public update() {
@@ -60,22 +83,21 @@ export class SceneService {
     }
 
     public createBox(conf) {
-        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
-        if (typeof conf.dimensions == 'undefined') { conf.dimensions = [1,1,1]};
-        if (typeof conf.static == 'undefined') { conf.static = false };
-        if (typeof conf.material == 'undefined') { conf.material = 'sign-arrow' };
-        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
+        conf = this.filterConfiguration(conf);
 
         // Cannon Body
         let shape = new this.CANNON.Box(new this.CANNON.Vec3(conf.dimensions[0], conf.dimensions[1], conf.dimensions[2]));
-        let mass = conf.static ? 0 : this.materials[conf.material].getDensity() * shape.volume();
-
+        let mass = this.calculateMass(conf, shape.volume());
+        console.log('MASS', mass);
+        
         let body = new this.CANNON.Body({
             material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
             mass: mass,
             shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
-            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2])
+            quaternion: new this.CANNON.Quaternion(conf.rotation[0],conf.rotation[1],conf.rotation[2]),
+            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
+            allowSleep: true
         });
 
         // Three Mesh
@@ -86,23 +108,22 @@ export class SceneService {
     }
 
     public createSphere(conf) {
-        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
-        if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-        if (typeof conf.static == 'undefined') { conf.static = false };
-        if (typeof conf.material == 'undefined') { conf.material = 'sign-arrow' };
-        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
-
+        conf = this.filterConfiguration(conf);
 
         // Cannon Body
         let shape = new this.CANNON.Sphere(conf.radius);
-        let mass = conf.static ? 0 : this.materials[conf.material].getDensity() * shape.volume();
+        let mass = this.calculateMass(conf, shape.volume());
 
         let body = new this.CANNON.Body({
             material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
             mass: mass,
             shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
-            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2])
+            quaternion: new this.CANNON.Quaternion(conf.rotation[0],conf.rotation[1],conf.rotation[2]),
+            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
+            linearDamping: 0.2,
+            angularDamping: 0.2,
+            allowSleep: true
         });
         
         // Three Mesh
@@ -111,6 +132,38 @@ export class SceneService {
 
         this.instantiate(body, mesh);
     };
+
+    private filterConfiguration(conf) {
+        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
+        if (typeof conf.rotation == 'undefined') { conf.rotation = [0,0,0] };
+        if (typeof conf.radius == 'undefined') { conf.radius = 1 };
+        if (typeof conf.static == 'undefined') { conf.static = false };
+        if (typeof conf.material == 'undefined') { conf.material = 'concrete' };
+        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
+        return conf;
+    }
+
+    private calculateMass(conf, volume) {
+        let mass = 0;
+        if (!conf.static) {
+            if (typeof conf.weight != 'undefined' && conf.weight.isInteger()) {
+                mass = conf.weight;
+            } else if (typeof conf.density != 'undefined' && conf.density.isInteger()) {
+                mass = conf.density * volume;
+            } else if (typeof this.materials[conf.material].getWeight() != 'undefined') {
+                mass = this.materials[conf.material].getWeight();
+            } else {
+                mass = this.materials[conf.material].getDensity() * volume;
+            }
+        }
+        return mass;
+    }
+
+    private addContactMaterials(contactMaterials: any[]) {
+        for (let i = 0, len = contactMaterials.length; i < len; i++) {
+            this.cannon.addContactMaterial(contactMaterials[i]);
+        }
+    }
 
     // public getObjectByBodyId(id) {
     //     for (let i = 0, len = this.objects.length; i < len; i++) {
@@ -180,12 +233,18 @@ export class SceneService {
 }
 
 export class Material {
-    private density: number = 1000;
+    //private density: number = 2000;
+    private density: number = 1;
+    private weight: number;
     private cannonMaterial: string = 'generic';
     private threeMaterial: string = 'generic';
 
     public getDensity() {
         return this.density;
+    }
+
+    public getWeight() {
+        return this.weight;
     }
 
     public getCannonMaterial() {
@@ -198,6 +257,10 @@ export class Material {
 
     public setDensity(density: number) {
         this.density = density;
+    }
+
+    public setWeight(weight: number) {
+        this.weight = weight;
     }
 
     public setCannonMaterial(material: string) {

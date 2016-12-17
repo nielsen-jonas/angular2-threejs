@@ -21,10 +21,12 @@ export class CannonService {
   public initialize() {
     // Setup our world
     this.world = new this.CANNON.World();
-    this.world.solver.iterations = 20;
+    //this.world.broadphase = new this.CANNON.NaiveBroadphase();
     this.world.solver.tolerance = 0;
+    this.world.solver.iterations = 20;
+    //this.world.defaultContactMaterial.contactEquationStiffness = 1e8;
+    //this.world.defaultContactMaterial.contactEquationRegularizationTime = 1;
     for (let i = 0, len = this.contactMaterials.length; i < len; i++) {
-        console.log('Adding contact material', this.contactMaterials[i]);
         this.world.addContactMaterial(this.contactMaterials[i]);
     }
   }

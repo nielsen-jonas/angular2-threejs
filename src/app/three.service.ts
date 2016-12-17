@@ -23,7 +23,7 @@ export class Camera {
     }
 
     public setStep(step) {
-        this.camMoveSpd = step * 10;
+        this.camMoveSpd = step * 4;
     }
 
     public setCameraPosition(x: number, y: number, z: number) {

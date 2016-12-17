@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, NgZone } from '@angular/core';
+import { Component, OnInit, ElementRef, NgZone, ChangeDetectorRef } from '@angular/core';
 import { WindowService } from '../window.service';
 import { CannonService } from '../cannon.service';
 import { ThreeService, Camera } from '../three.service';
@@ -19,8 +19,9 @@ export class GameComponent implements OnInit {
   private element: any;
   //private tickInterval: any;
 
-  private fps: number = 30;
+  private fps: number = 60;
   private step: number = 1/this.fps;
+  private cannonStep: number = 1/(this.fps*2)
 
   private ticks: number = 0;
   private tickDelta: number;
@@ -33,6 +34,7 @@ export class GameComponent implements OnInit {
   constructor(
       el: ElementRef,
       private zone: NgZone,
+      private changeDetector: ChangeDetectorRef,
       private window: WindowService,
       private cannon: CannonService,
       private camera: Camera,
@@ -63,6 +65,7 @@ export class GameComponent implements OnInit {
       this.zone.runOutsideAngular(() => {
          requestAnimationFrame((timestamp) => {
              this.tick(timestamp);
+             this.changeDetector.detectChanges();
          }); 
       });
   };
@@ -73,13 +76,15 @@ export class GameComponent implements OnInit {
           this.tickDelta = timestamp - this.tickLast;
           this.fps = 1000/this.tickDelta;
           this.step = 1/this.fps;
+          //this.cannonStep = 1/(this.fps*2);
           
           this.camera.setStep(this.step);
           
           this.cannon.step(this.step, this.tickDelta/1000);
+          //this.cannon.step(this.cannonStep, this.tickDelta/1000);
           this.scene.update();
           this.three.render();
-          this.game.main();
+          this.game.main(this.step);
           this.input.flush();
           this.mouse.flush();
           this.avgFps.update(this.fps, this.step);

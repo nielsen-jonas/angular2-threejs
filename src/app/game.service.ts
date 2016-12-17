@@ -12,6 +12,9 @@ export class GameService {
     private camDir;
     private bodies;
 
+    private charge = 10;
+    private item = 0;
+
   constructor(
       private cannon: CannonService,
       private three: ThreeService,
@@ -22,37 +25,12 @@ export class GameService {
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
-      this.camera.setCameraPosition(0,5,64);
+      this.camera.setCameraPosition(0,5,16);
 
-      this.scene.createBox({
-          position: [0,0,0],
-          dimensions: [1000,1,1000],
-          static: true 
-      });
-
-      // this.scene.createSphere({
-      //     position: [0,20,0],
-      //     radius: 2,
-      //     material: 'concrete'});
-
-      // this.scene.createSphere({
-      //     position: [0,30,0],
-      //     radius: 4});
-      //     
-      // this.scene.createBox({
-      //     position: [0,40,0],
-      //     dimensions: [2, 4, 2],
-      //     material: 'concrete'});
-
-      for (let i = 5; i < 50; i += 5) {
-          this.scene.createBox({
-              position: [0,i,0],
-              dimensions: [10, 1, 5],
-              material: 'concrete'});
-      }
+      this.initLvl1();
   }
 
-  public main() {
+  public main(step) {
 
       // Halt simulation until mousepointer is locked 
       if (!this.mouse.pointerIsLocked()) {
@@ -94,22 +72,108 @@ export class GameService {
           }
       }
 
+      if (this.mouse.getButton('left').isDown()) {
+          this.charge += step*10;
+          if (this.charge > 20) {
+              this.charge = 20;
+          }
+      }
+
       
-      if (this.mouse.getButton('left').isPressed()) {
-          this.scene.createSphere({
-              position: [this.camPos.x, this.camPos.y, this.camPos.z],
-              velocity: [40*this.camDir.x, 40*this.camDir.y, 40*this.camDir.z] 
+      if (this.mouse.getButton('left').isReleased()) {
+          if (this.item == 0) {
+              this.scene.createSphere({
+                  position: [this.camPos.x, this.camPos.y, this.camPos.z],
+                  rotation: [this.camDir.x, this.camDir.y, this.camDir.z],
+                  velocity: [this.charge*this.camDir.x, this.charge*this.camDir.y, this.charge*this.camDir.z],
+                  radius: 0.12,
+                  material: 'soccer-ball'
+              });
+          } else if (this.item == 1) {
+              this.scene.createBox({
+                  position: [this.camPos.x, this.camPos.y, this.camPos.z],
+                  rotation: [this.camDir.x, this.camDir.y, this.camDir.z],
+                  velocity: [this.charge*this.camDir.x, this.charge*this.camDir.y, this.charge*this.camDir.z],
+                  dimensions: [.092, .057, .194],
+                  material: 'concrete'
+              });
+          }
+          this.charge = 10;
+      }
+  }
+
+  public getCharge() {
+      return this.charge-10;
+  }
+
+  private initLvl1() {
+      this.scene.createBox({
+          position: [29.5, 8, 0],
+          dimensions: [.2, 1, 1],
+          static: true,
+          material: 'concrete'
+      });
+
+      this.scene.createSphere({
+          position: [24.5,5,0],
+          radius: 1,
+          material: 'concrete'
+      });
+      
+      this.scene.createBox({
+          position: [24.5, 2.2, 0],
+          dimensions: [.04,.2,.2],
+          static: true,
+          material: 'concrete'
+      });
+      this.scene.createBox({
+          position: [19.7,1,0],
+          dimensions: [5,.1,.2],
+          rotation: [0,0,.1],
+          static: true,
+          material: 'concrete'
+      });
+
+      this.scene.createBox({
+          position: [9.9,-1,0],
+          rotation: [0,0,.1],
+          dimensions: [5,.1,.2],
+          static: true,
+          material: 'concrete'
+      });
+
+      this.scene.createBox({
+          position: [2,-2,0],
+          dimensions: [3,.1,.2],
+          static: true,
+          material: 'concrete'
+      });
+
+      for (let x = -15; x < 0; x += 6.5){
+          this.scene.createBox({
+              position: [x,-2,0],
+              dimensions: [1,.1,5],
+              static: true,
+              material: 'concrete' 
           });
+
+          for (let z = -2; z < 3; z += 1) {
+              this.scene.createBox({
+                  position: [x,1,z],
+                  dimensions: [.3,3,.3],
+                  material: 'concrete' 
+              });
+          }
       }
 
-      if(this.mouse.getButton('right').isPressed()) {
-          this.scene.createSphere({
-              position: [this.camPos.x, this.camPos.y, this.camPos.z],
-              velocity: [100*this.camDir.x, 100*this.camDir.y, 100*this.camDir.z],
-              radius: .3
+      for (let x = -36; x < -16; x += 10){
+          this.scene.createBox({
+              position: [x,-2,0],
+              dimensions: [5,.1,5],
+              static: true,
+              material: 'concrete' 
           });
       }
-
   }
 
 }
