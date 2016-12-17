@@ -84,7 +84,7 @@ export class Camera {
     }
 
     public reloadSkybox() {
-        this.skybox.load();
+        this.skybox.loadMaterial();
     }
 
 }
@@ -213,6 +213,11 @@ export class Skybox {
     }
 
     public load() {
+        this.loadMaterial();
+        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), this.material);
+    }
+
+    public loadMaterial() {
         this.textureCube = this.cubeTextureLoader.load(this.urls);
         this.shader = this.THREE.ShaderLib.cube;
         this.shader.uniforms.tCube.value = this.textureCube;
@@ -223,8 +228,5 @@ export class Skybox {
             depthWrite: false,
             side: this.THREE.BackSide
         });
-
-        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), this.material);
     }
-
 }
