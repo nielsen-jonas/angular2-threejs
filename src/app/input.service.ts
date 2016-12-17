@@ -7,7 +7,8 @@ export class InputService {
         up: new KeyState,
         down: new KeyState,
         left: new KeyState,
-        right: new KeyState 
+        right: new KeyState,
+        shift: new KeyState
     }; 
 
     constructor() { // TODO: Decouple from DOM
@@ -29,6 +30,9 @@ export class InputService {
                 case 'd':
                 case 'arrowright':
                     this.key.right.press();
+                    break;
+                case 'shift':
+                    this.key.shift.press();
                     break;
             }
         });
@@ -52,6 +56,9 @@ export class InputService {
                 case 'arrowright':
                     this.key.right.release();
                     break;
+                case 'shift':
+                    this.key.shift.release();
+                    break;
             }
         });
     }
@@ -61,6 +68,7 @@ export class InputService {
         this.key.down.flush();
         this.key.left.flush();
         this.key.right.flush();
+        this.key.shift.flush();
     }
 
     public getKey(key) {

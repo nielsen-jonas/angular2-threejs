@@ -6,6 +6,8 @@ import { WindowService } from './window.service';
 export class Camera {
     private THREE;
     private camera: any;
+    private step: number;
+    private zoom: number = 1;
     private pitchObj: any;
     private camMoveSpd: number;
     private skybox: Skybox;
@@ -23,6 +25,7 @@ export class Camera {
     }
 
     public setStep(step) {
+        this.step = step;
         this.camMoveSpd = step * 4;
     }
 
@@ -86,6 +89,23 @@ export class Camera {
     public reloadSkybox() {
         this.skybox.loadMaterial();
     }
+
+    public zoomIn() {
+        this.zoom += this.step*8; 
+        if (this.zoom != 2) {
+            if (this.zoom > 2) {
+                this.zoom = 2;
+            }
+            this.camera.zoom = this.zoom;
+            this.camera.updateProjectionMatrix();
+        }
+    }
+
+    public zoomOff() {
+        this.zoom = 1;
+        this.camera.zoom = this.zoom;
+        this.camera.updateProjectionMatrix();
+    } 
 
 }
 

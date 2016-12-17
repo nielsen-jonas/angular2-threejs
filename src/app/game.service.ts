@@ -100,6 +100,13 @@ export class GameService {
           }
           this.charge = 10;
       }
+
+      if (this.input.getKey('shift').isDown()) {
+          this.camera.zoomIn();
+      }
+      if (this.input.getKey('shift').isReleased()) {
+          this.camera.zoomOff();
+      }
   }
 
   public getCharge() {
