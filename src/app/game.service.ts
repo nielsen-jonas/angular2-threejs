@@ -22,35 +22,34 @@ export class GameService {
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
-      this.camera.setCameraPosition(0,0,32);
+      this.camera.setCameraPosition(0,5,64);
 
-      // this.scene.createSphere([-8,10,0], 2, 1, 'concrete-plaster');
-      this.scene.createSphere({
-          position: [0,10,0],
-          radius: 2,
-          mass: 1,
-          material: 'concrete'});
-      // this.scene.createSphere([8,10,0], 2, 1, 'concrete-plaster');
-      this.scene.createSphere({
-          position: [0,20,0],
-          radius: 4});
-      // this.scene.createSphere([0,30,0]);
-      // this.scene.createSphere([0,50,0]);
-      // this.scene.createSphere([1,80,0]);
-      // 
-      // this.scene.createSphere([-10,100,0]);
-      // this.scene.createSphere([5,200,0]);
+      this.scene.createBox({
+          position: [0,0,0],
+          dimensions: [1000,1,1000],
+          static: true 
+      });
 
-      // this.scene.createSphere([-5,250,5]);
-      // this.scene.createSphere([5,300,5]);
-      // this.scene.createSphere([-2,400,2]);
-      // this.scene.createSphere([1,410,3]);
+      // this.scene.createSphere({
+      //     position: [0,20,0],
+      //     radius: 2,
+      //     material: 'concrete'});
 
-      this.scene.createSphere({
-          position: [0,-128,0],
-          radius: 128,
-          mass: 0,
-          material: 'concrete'});
+      // this.scene.createSphere({
+      //     position: [0,30,0],
+      //     radius: 4});
+      //     
+      // this.scene.createBox({
+      //     position: [0,40,0],
+      //     dimensions: [2, 4, 2],
+      //     material: 'concrete'});
+
+      for (let i = 5; i < 50; i += 5) {
+          this.scene.createBox({
+              position: [0,i,0],
+              dimensions: [10, 1, 5],
+              material: 'concrete'});
+      }
   }
 
   public main() {
@@ -103,10 +102,11 @@ export class GameService {
           });
       }
 
-      if(this.mouse.getButton('right').isDown()) {
+      if(this.mouse.getButton('right').isPressed()) {
           this.scene.createSphere({
               position: [this.camPos.x, this.camPos.y, this.camPos.z],
-              velocity: [1200*this.camDir.x, 1200*this.camDir.y, 1200*this.camDir.z]
+              velocity: [100*this.camDir.x, 100*this.camDir.y, 100*this.camDir.z],
+              radius: .3
           });
       }
 

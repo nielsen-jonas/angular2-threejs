@@ -10,6 +10,8 @@ export class CannonService {
 
     private running: boolean = false;
 
+    private contactMaterials: any[] = [];
+
   constructor() { }
 
   public getCannon() {
@@ -19,6 +21,16 @@ export class CannonService {
   public initialize() {
     // Setup our world
     this.world = new this.CANNON.World();
+    this.world.solver.iterations = 20;
+    this.world.solver.tolerance = 0;
+    for (let i = 0, len = this.contactMaterials.length; i < len; i++) {
+        console.log('Adding contact material', this.contactMaterials[i]);
+        this.world.addContactMaterial(this.contactMaterials[i]);
+    }
+  }
+
+  public addContactMaterial(contactMaterial) {
+      this.contactMaterials.push(contactMaterial);
   }
 
   public setGravity(x: number = 0, y: number = 0, z: number = 0) {

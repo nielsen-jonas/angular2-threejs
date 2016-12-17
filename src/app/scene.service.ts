@@ -14,15 +14,38 @@ export class SceneService {
     private textureLoader: any;
     private textures: any[] = [];
     private materials: any[] = [];
+    private cannonMaterials: any[] = [];
+    private cannonContactMaterials: any[] = [];
+    private threeMaterials: any[] = [];
 
     constructor(private cannon: CannonService, private three: ThreeService) {
+
         this.CANNON = this.cannon.getCannon();
         this.THREE = this.three.getThree();
+
         this.textureLoader = new this.THREE.TextureLoader();
-        this.textures.push(this.textureLoader.load('./assets/textures/sign_arrow.jpg'));
-        this.materials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures[0]});
-        this.textures.push(this.textureLoader.load('./assets/textures/concrete.jpg'));
-        this.materials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures[1]});
+        this.textures['sign-arrow'] = this.textureLoader.load('./assets/textures/sign_arrow.jpg');
+        this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
+
+        this.cannonMaterials['generic'] = new this.CANNON.Material();
+        this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
+        this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
+
+        this.materials['sign-arrow'] = [];
+        this.materials['concrete'] = [];
+        this.materials['sign-arrow'] = new Material;
+        this.materials['sign-arrow'].setThreeMaterial('sign-arrow');
+        this.materials['concrete'] = new Material;
+        this.materials['concrete'].setDensity(2515);
+        this.materials['concrete'].setThreeMaterial('concrete');
+
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['generic'], this.cannonMaterials['generic'], {
+            friction: 0.8,
+            restitution: 0.0
+        }));
+        this.cannonContactMaterials[0].contactEquationStiffness = 1e8;
+        this.cannonContactMaterials[0].contactEquationRegularizationTime = 3;
+        this.cannon.addContactMaterial(this.cannonContactMaterials[0]);
     }
 
     public update() {
@@ -36,27 +59,55 @@ export class SceneService {
         return this.objectCount;
     }
 
-    public createRectangle(conf) {
+    public createBox(conf) {
+        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
+        if (typeof conf.dimensions == 'undefined') { conf.dimensions = [1,1,1]};
+        if (typeof conf.static == 'undefined') { conf.static = false };
+        if (typeof conf.material == 'undefined') { conf.material = 'sign-arrow' };
+        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
+
+        // Cannon Body
+        let shape = new this.CANNON.Box(new this.CANNON.Vec3(conf.dimensions[0], conf.dimensions[1], conf.dimensions[2]));
+        let mass = conf.static ? 0 : this.materials[conf.material].getDensity() * shape.volume();
+
+        let body = new this.CANNON.Body({
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            mass: mass,
+            shape: shape,
+            position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
+            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2])
+        });
+
+        // Three Mesh
+        let geometry = new this.THREE.BoxGeometry(conf.dimensions[0]*2, conf.dimensions[1]*2, conf.dimensions[2]*2);
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
+        
+        this.instantiate(body, mesh);
     }
 
     public createSphere(conf) {
         if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
         if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-        if (typeof conf.mass == 'undefined') { conf.mass = 1 };
+        if (typeof conf.static == 'undefined') { conf.static = false };
         if (typeof conf.material == 'undefined') { conf.material = 'sign-arrow' };
         if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
 
+
         // Cannon Body
+        let shape = new this.CANNON.Sphere(conf.radius);
+        let mass = conf.static ? 0 : this.materials[conf.material].getDensity() * shape.volume();
+
         let body = new this.CANNON.Body({
-            mass: conf.mass,
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            mass: mass,
+            shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
-            shape: new this.CANNON.Sphere(conf.radius),
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2])
         });
         
         // Three Mesh
         let geometry = new this.THREE.SphereGeometry(conf.radius, 16, 16);
-        let mesh = new this.THREE.Mesh( geometry, this.materials[conf.material] );
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
 
         this.instantiate(body, mesh);
     };
@@ -126,4 +177,34 @@ export class SceneService {
        this.three.addMesh(mesh);
    }
   
+}
+
+export class Material {
+    private density: number = 1000;
+    private cannonMaterial: string = 'generic';
+    private threeMaterial: string = 'generic';
+
+    public getDensity() {
+        return this.density;
+    }
+
+    public getCannonMaterial() {
+        return this.cannonMaterial;
+    }
+
+    public getThreeMaterial() {
+        return this.threeMaterial;
+    }
+
+    public setDensity(density: number) {
+        this.density = density;
+    }
+
+    public setCannonMaterial(material: string) {
+        this.cannonMaterial = material;
+    }
+
+    public setThreeMaterial(material: string) {
+        this.threeMaterial = material;
+    }
 }
