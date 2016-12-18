@@ -128,7 +128,7 @@ export class SceneService {
         let geometry = new this.THREE.BoxGeometry(conf.dimensions[0]*2, conf.dimensions[1]*2, conf.dimensions[2]*2);
         let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
         
-        this.instantiate(body, mesh);
+        return this.instantiate(body, mesh);
     }
 
     public createCylinder(conf) {
@@ -162,7 +162,7 @@ export class SceneService {
         let geometry = new this.THREE.CylinderGeometry(conf.radiusTop, conf.radiusBottom, conf.height, conf.radiusSegments);
         let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
 
-        this.instantiate(body, mesh);
+        return this.instantiate(body, mesh);
     }
 
     public createSphere(conf) {
@@ -189,7 +189,7 @@ export class SceneService {
         let geometry = new this.THREE.SphereGeometry(conf.radius, 16, 16);
         let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
 
-        this.instantiate(body, mesh);
+        return this.instantiate(body, mesh);
     };
 
     private filterConfiguration(conf, type: string) {
@@ -305,6 +305,7 @@ export class SceneService {
        // Add Object
        this.cannon.addBody(body);
        this.three.addMesh(mesh);
+       return object;
    }
   
 }

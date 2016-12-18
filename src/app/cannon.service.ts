@@ -37,11 +37,12 @@ export class CannonService {
 
   public setGravity(x: number = 0, y: number = 0, z: number = 0) {
       this.world.gravity.set(x, y, z);
-  };
+  }
 
   public addBody(body: any) {
       this.bodies[body.id] = body;
       this.world.addBody(body);
+      return body.id;
   }
 
   public getBodies() {
@@ -57,11 +58,16 @@ export class CannonService {
       delete this.bodies[id];
   }
 
+  public distanceConstraintById(id1: number, id2: number, distance: number = null, maxForce: number = null) {
+      let constraint = new this.CANNON.DistanceConstraint(this.bodies[id1], this.bodies[id2], distance, maxForce);
+      this.world.addConstraint(constraint);
+  }
+
   public step(fixedTimeStep: number, timeSinceLastCalled: number) {
       if (this.running) {
           this.world.step(fixedTimeStep, timeSinceLastCalled);
       }
-  };
+  }
 
   public halt() {
       this.running = false;
