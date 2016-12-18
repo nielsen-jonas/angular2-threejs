@@ -12,7 +12,7 @@ export class GameService {
     private camDir;
     private bodies;
 
-    private charge = 10;
+    private charge = 5;
     private item = 0;
 
   constructor(
@@ -98,7 +98,7 @@ export class GameService {
                   material: 'concrete'
               });
           }
-          this.charge = 10;
+          this.charge = 5;
       }
 
       if (this.input.getKey('shift').isDown()) {
@@ -110,31 +110,39 @@ export class GameService {
   }
 
   public getCharge() {
-      return this.charge-10;
+      return this.charge-5;
   }
 
   private initLvl1() {
       this.scene.createBox({
-          position: [29.5, 8, 0],
+          position: [16, 4, .5],
           dimensions: [.2, 1, 1],
           static: true,
-          material: 'concrete'
+          material: 'spring'
+      });
+      
+      this.scene.createBox({
+          position: [9,-3, 3],
+          dimensions: [1,.1,1],
+          static: true,
+          material: 'spring'
       });
 
+
       this.scene.createSphere({
-          position: [24.5,5,0],
+          position: [11,5,0],
           radius: 1,
           material: 'concrete'
       });
       
       this.scene.createBox({
-          position: [24.5, 2.2, 0],
-          dimensions: [.04,.2,.2],
+          position: [11, 2.2, 0],
+          dimensions: [.04,.2,.04],
           static: true,
           material: 'concrete'
       });
       this.scene.createBox({
-          position: [19.7,1,0],
+          position: [6.2,1,0],
           dimensions: [5,.1,.2],
           rotation: [0,0,.1],
           static: true,
@@ -142,16 +150,8 @@ export class GameService {
       });
 
       this.scene.createBox({
-          position: [9.9,-1,0],
-          rotation: [0,0,.1],
-          dimensions: [5,.1,.2],
-          static: true,
-          material: 'concrete'
-      });
-
-      this.scene.createBox({
-          position: [2,-2,0],
-          dimensions: [3,.1,.2],
+          position: [-2,-1.8,6.5],
+          dimensions: [1.5,.3,1.5],
           static: true,
           material: 'concrete'
       });
@@ -159,7 +159,7 @@ export class GameService {
       for (let x = -15; x < 0; x += 6.5){
           this.scene.createBox({
               position: [x,-2,0],
-              dimensions: [1,.1,5],
+              dimensions: [1.5,.1,5],
               static: true,
               material: 'concrete' 
           });

@@ -30,9 +30,11 @@ export class SceneService {
         this.cannonMaterials['generic'] = new this.CANNON.Material();
         this.cannonMaterials['concrete'] = new this.CANNON.Material();
         this.cannonMaterials['soccer-ball'] = new this.CANNON.Material();
+        this.cannonMaterials['spring'] = new this.CANNON.Material();
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
+        this.threeMaterials['orange'] = new this.THREE.MeshLambertMaterial({ color: 0xffbd4a });
 
         this.materials['soccer-ball'] = new Material;
         this.materials['soccer-ball'].setWeight(.45);
@@ -42,6 +44,9 @@ export class SceneService {
         this.materials['concrete'].setDensity(25.15);
         this.materials['concrete'].setCannonMaterial('concrete');
         this.materials['concrete'].setThreeMaterial('concrete');
+        this.materials['spring'] = new Material;
+        this.materials['spring'].setCannonMaterial('spring');
+        this.materials['spring'].setThreeMaterial('orange');
         
         // Concrete vs concrete
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['concrete'], {
@@ -59,6 +64,12 @@ export class SceneService {
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['soccer-ball'], {
             friction: 0.04,
             restitution: 0.4
+        }));
+
+        // Soccer ball vs spring
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['spring'], {
+            friction: 0.04,
+            restitution: 1.8 
         }));
 
         // Tune contacts
