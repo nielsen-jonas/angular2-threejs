@@ -114,6 +114,14 @@ export class GameService {
   }
 
   private initLvl1() {
+      this.scene.createSphere({
+          position: [-30,8,0],
+          fixedRotation: true,
+          linearDamping: 0,
+          angularDamping: 0,
+          radius: 0.30,
+          material: 'player'
+      });
 
       this.scene.createBox({
           position: [16, 4, .5],

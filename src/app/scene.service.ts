@@ -31,10 +31,12 @@ export class SceneService {
         this.cannonMaterials['concrete'] = new this.CANNON.Material();
         this.cannonMaterials['soccer-ball'] = new this.CANNON.Material();
         this.cannonMaterials['spring'] = new this.CANNON.Material();
+        this.cannonMaterials['frictionless'] = new this.CANNON.Material();
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
         this.threeMaterials['orange'] = new this.THREE.MeshLambertMaterial({ color: 0xffbd4a });
+        this.threeMaterials['blue'] = new this.THREE.MeshLambertMaterial({ color: 0x2b50b3 });
 
         this.materials['soccer-ball'] = new Material;
         this.materials['soccer-ball'].setWeight(.45);
@@ -47,11 +49,21 @@ export class SceneService {
         this.materials['spring'] = new Material;
         this.materials['spring'].setCannonMaterial('spring');
         this.materials['spring'].setThreeMaterial('orange');
+        this.materials['player'] = new Material;
+        this.materials['player'].setDensity(9.85);
+        this.materials['player'].setCannonMaterial('frictionless');
+        this.materials['player'].setThreeMaterial('blue');
+        
+        // Frictionless vs concrete
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['frictionless'], this.cannonMaterials['concrete'], {
+            friction: 0.0,
+            restitution: 0.0
+        }));
         
         // Concrete vs concrete
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['concrete'], {
             friction: 0.02,
-            restitution: 0.0,
+            restitution: 0.0
         }));
 
         // Soccer ball vs soccer ball
@@ -108,7 +120,8 @@ export class SceneService {
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
             quaternion: new this.CANNON.Quaternion(conf.rotation[0],conf.rotation[1],conf.rotation[2]),
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
-            allowSleep: true
+            allowSleep: true,
+            fixedRotation: conf.fixedRotation
         });
 
         // Three Mesh
@@ -140,7 +153,8 @@ export class SceneService {
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
             linearDamping: 0.2,
             angularDamping: 0.2,
-            allowSleep: true
+            allowSleep: true,
+            fixedRotation: conf.fixedRotation
         });
 
 
@@ -167,7 +181,8 @@ export class SceneService {
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
             linearDamping: 0.2,
             angularDamping: 0.2,
-            allowSleep: true
+            allowSleep: true,
+            fixedRotation: conf.fixedRotation
         });
         
         // Three Mesh
@@ -183,6 +198,9 @@ export class SceneService {
         if (typeof conf.material == 'undefined') { conf.material = 'concrete' };
         if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
         if (typeof conf.static == 'undefined') { conf.static = false };
+        if (typeof conf.fixedRotation == 'undefined') { conf.fixedRotation = false };
+        if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.0 };
+        if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.0 };
         switch (type) {
             case 'box':
                 break;
@@ -195,6 +213,8 @@ export class SceneService {
                 break;
             case 'sphere':
                 if (typeof conf.radius == 'undefined') { conf.radius = 1 };
+                conf.linearDamping = 0.2;
+                conf.angularDamping = 0.2;
                 break
         }
         return conf;
