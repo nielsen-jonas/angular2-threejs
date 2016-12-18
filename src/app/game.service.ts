@@ -6,6 +6,98 @@ import { InputService } from './input.service';
 import { MouseService } from './mouse.service';
 
 @Injectable()
+export class Player {
+    private CANNON;
+
+    private initialized: boolean = false;
+
+    private headId: number;
+    private midId: number;
+    private feetId: number;
+    private headBody: any;
+    private midBody: any;
+    private feetBody: any;
+
+    private headRadius: number = .2;
+    private midRadius: number = .25;
+    private feetRadius: number = .3;
+    private partsDistance: number = .05;
+    
+    private strength: number;
+
+    constructor(private scene: SceneService, private cannon: CannonService) {
+        this.CANNON = cannon.getCannon();
+    }
+
+    public initialize(position: number[] = [0,0,0]) {
+        this.feetId = this.scene.createSphere({
+            position: [position[0],position[1],position[3]],
+            fixedRotation: true,
+            linearDamping: .6,
+            angularDamping: .6,
+            radius: this.feetRadius,
+            material: 'player'
+        })[0];
+
+        this.midId = this.scene.createSphere({
+            position: [
+                position[0],
+                position[1]+this.feetRadius+this.midRadius+this.partsDistance,
+                position[3]],
+            fixedRotation: true,
+            linearDamping: .6,
+            angularDamping: .6,
+            radius: this.midRadius,
+            material: 'player'
+        })[0];
+
+        this.headId = this.scene.createSphere({
+            position: [
+                position[0],
+                position[1]+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
+                position[3]],
+            fixedRotation: true,
+            linearDamping: .6,
+            angularDamping: .6,
+            radius: this.headRadius,
+            material: 'player'
+        })[0];
+
+        this.feetBody = this.cannon.getBodyById(this.feetId);
+        this.midBody = this.cannon.getBodyById(this.midId);
+        this.headBody = this.cannon.getBodyById(this.headId);
+
+        this.cannon.distanceConstraintById(this.feetId, this.midId,
+            this.feetRadius+this.midRadius+this.partsDistance,
+            10);
+        this.cannon.distanceConstraintById(this.midId, this.headId,
+            this.midRadius+this.headRadius+this.partsDistance,
+            10);
+        this.cannon.distanceConstraintById(this.feetId, this.headId,
+            this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
+            10);
+        this.initialized = true;
+    }
+
+    public isFalling(): boolean {
+        let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
+        return !(Math.round(feetVelocity) === 0);
+    }
+
+    public step() {
+      if (this.isInitialized && !this.isFalling()) {
+          this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), new this.CANNON.Vec3(0, 100, 0));
+          this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), new this.CANNON.Vec3(0, -100, 0));
+          this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), new this.CANNON.Vec3(0, -100, 0));
+      }
+    }
+
+    public isInitialized(): boolean {
+        return this.initialized;
+    }
+}
+
+@Injectable()
 export class GameService {
 
     private camPos;
@@ -15,13 +107,6 @@ export class GameService {
     private charge = 5;
     private item = 0;
 
-    private playerHeadId;
-    private playerMidId;
-    private playerFeetId;
-    private playerHeadBody;
-    private playerMidBody;
-    private playerFeetBody;
-
     private CANNON;
 
   constructor(
@@ -30,7 +115,8 @@ export class GameService {
       private camera: Camera,
       private scene: SceneService,
       private input: InputService,
-      private mouse: MouseService) { }
+      private mouse: MouseService,
+      private player: Player) { }
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
@@ -38,6 +124,7 @@ export class GameService {
       this.CANNON = this.cannon.getCannon();
 
       this.initLvl1();
+      this.player.initialize([-25, 8, 0]);
   }
 
   public main(step) {
@@ -118,13 +205,7 @@ export class GameService {
           this.camera.zoomOff();
       }
       
-      let feetVelocity = this.playerFeetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
-
-      if (Math.round(feetVelocity) == 0) {
-          this.playerFeetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), new this.CANNON.Vec3(0, 100, 0));
-          this.playerMidBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), new this.CANNON.Vec3(0, -100, 0));
-          this.playerHeadBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), new this.CANNON.Vec3(0, -100, 0));
-      }
+      this.player.step();
   }
 
   public getCharge() {
@@ -132,41 +213,6 @@ export class GameService {
   }
 
   private initLvl1() {
-      this.playerFeetId = this.scene.createSphere({
-          position: [-30,4,0],
-          fixedRotation: true,
-          linearDamping: .6,
-          angularDamping: .6,
-          radius: 0.3,
-          material: 'player'
-      })[0];
-
-      this.playerMidId = this.scene.createSphere({
-          position: [-30,4.60,0],
-          fixedRotation: true,
-          linearDamping: .6,
-          angularDamping: .6,
-          radius: 0.25,
-          material: 'player'
-      })[0];
-
-      this.playerHeadId = this.scene.createSphere({
-          position: [-30,5.2,0],
-          fixedRotation: true,
-          linearDamping: .6,
-          angularDamping: .6,
-          radius: 0.2,
-          material: 'player'
-      })[0];
-
-      this.playerFeetBody = this.cannon.getBodyById(this.playerFeetId);
-      this.playerMidBody = this.cannon.getBodyById(this.playerMidId);
-      this.playerHeadBody = this.cannon.getBodyById(this.playerHeadId);
-
-      this.cannon.distanceConstraintById(this.playerFeetId, this.playerMidId, .60, 10);
-      this.cannon.distanceConstraintById(this.playerMidId, this.playerHeadId, .60, 10);
-      this.cannon.distanceConstraintById(this.playerFeetId, this.playerHeadId, 1.2, 10);
-
       this.scene.createBox({
           position: [16, 5, .5],
           dimensions: [.2, 1, 1],

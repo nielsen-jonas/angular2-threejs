@@ -4,6 +4,7 @@ import { CannonService } from '../cannon.service';
 import { ThreeService, Camera } from '../three.service';
 import { SceneService } from '../scene.service';
 import { GameService } from '../game.service';
+import { Player } from '../game.service';
 import { InputService } from '../input.service';
 import { MouseService } from '../mouse.service';
 
@@ -11,7 +12,7 @@ import { MouseService } from '../mouse.service';
   selector: 'tjsg-game',
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.css'],
-  providers: [WindowService, CannonService, Camera, ThreeService, SceneService, GameService, InputService, MouseService]
+  providers: [WindowService, CannonService, Camera, ThreeService, SceneService, GameService, Player, InputService, MouseService]
 })
 export class GameComponent implements OnInit {
 

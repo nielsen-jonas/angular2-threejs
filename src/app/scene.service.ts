@@ -111,7 +111,6 @@ export class SceneService {
         // Cannon Body
         let shape = new this.CANNON.Box(new this.CANNON.Vec3(conf.dimensions[0], conf.dimensions[1], conf.dimensions[2]));
         let mass = this.calculateMass(conf, shape.volume());
-        console.log('MASS', mass);
         
         let body = new this.CANNON.Body({
             material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
