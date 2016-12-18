@@ -120,6 +120,8 @@ export class SceneService {
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
             quaternion: new this.CANNON.Quaternion(conf.rotation[0],conf.rotation[1],conf.rotation[2]),
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
+            linearDamping: conf.linearDamping,
+            angularDamping: conf.angularDamping,
             allowSleep: true,
             fixedRotation: conf.fixedRotation
         });
@@ -151,8 +153,8 @@ export class SceneService {
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
             quaternion: new this.CANNON.Quaternion(conf.rotation[0], conf.rotation[1], conf.rotation[2]),
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
-            linearDamping: 0.2,
-            angularDamping: 0.2,
+            linearDamping: conf.linearDamping,
+            angularDamping: conf.angularDamping,
             allowSleep: true,
             fixedRotation: conf.fixedRotation
         });
@@ -179,8 +181,8 @@ export class SceneService {
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
             quaternion: new this.CANNON.Quaternion(conf.rotation[0],conf.rotation[1],conf.rotation[2]),
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
-            linearDamping: 0.2,
-            angularDamping: 0.2,
+            linearDamping: conf.linearDamping,
+            angularDamping: conf.angularDamping,
             allowSleep: true,
             fixedRotation: conf.fixedRotation
         });
@@ -199,8 +201,6 @@ export class SceneService {
         if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
         if (typeof conf.static == 'undefined') { conf.static = false };
         if (typeof conf.fixedRotation == 'undefined') { conf.fixedRotation = false };
-        if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.0 };
-        if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.0 };
         switch (type) {
             case 'box':
                 break;
@@ -213,10 +213,12 @@ export class SceneService {
                 break;
             case 'sphere':
                 if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-                conf.linearDamping = 0.2;
-                conf.angularDamping = 0.2;
+                if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.2 };
+                if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.2 };
                 break
         }
+        if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.0 };
+        if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.0 };
         return conf;
     }
 

@@ -133,28 +133,28 @@ export class GameService {
 
   private initLvl1() {
       this.playerFeetId = this.scene.createSphere({
-          position: [-30,5.5,0],
+          position: [-30,4,0],
           fixedRotation: true,
-          linearDamping: 10,
-          angularDamping: 10,
+          linearDamping: .6,
+          angularDamping: .6,
           radius: 0.3,
           material: 'player'
       })[0];
 
       this.playerMidId = this.scene.createSphere({
-          position: [-30,4.75,0],
+          position: [-30,4.60,0],
           fixedRotation: true,
-          linearDamping: 10,
-          angularDamping: 10,
+          linearDamping: .6,
+          angularDamping: .6,
           radius: 0.25,
           material: 'player'
       })[0];
 
       this.playerHeadId = this.scene.createSphere({
-          position: [-30,4,0],
+          position: [-30,5.2,0],
           fixedRotation: true,
-          linearDamping: 10,
-          angularDamping: 10,
+          linearDamping: .6,
+          angularDamping: .6,
           radius: 0.2,
           material: 'player'
       })[0];
@@ -163,9 +163,9 @@ export class GameService {
       this.playerMidBody = this.cannon.getBodyById(this.playerMidId);
       this.playerHeadBody = this.cannon.getBodyById(this.playerHeadId);
 
-      this.cannon.distanceConstraintById(this.playerFeetId, this.playerMidId, .75, 10);
-      this.cannon.distanceConstraintById(this.playerMidId, this.playerHeadId, .75, 10);
-      this.cannon.distanceConstraintById(this.playerFeetId, this.playerHeadId, 1.5, 10);
+      this.cannon.distanceConstraintById(this.playerFeetId, this.playerMidId, .60, 10);
+      this.cannon.distanceConstraintById(this.playerMidId, this.playerHeadId, .60, 10);
+      this.cannon.distanceConstraintById(this.playerFeetId, this.playerHeadId, 1.2, 10);
 
       this.scene.createBox({
           position: [16, 5, .5],
