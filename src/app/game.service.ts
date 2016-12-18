@@ -114,6 +114,7 @@ export class GameService {
   }
 
   private initLvl1() {
+
       this.scene.createBox({
           position: [16, 4, .5],
           dimensions: [.2, 1, 1],

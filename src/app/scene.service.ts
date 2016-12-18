@@ -94,7 +94,7 @@ export class SceneService {
     }
 
     public createBox(conf) {
-        conf = this.filterConfiguration(conf);
+        conf = this.filterConfiguration(conf, 'box');
 
         // Cannon Body
         let shape = new this.CANNON.Box(new this.CANNON.Vec3(conf.dimensions[0], conf.dimensions[1], conf.dimensions[2]));
@@ -118,8 +118,41 @@ export class SceneService {
         this.instantiate(body, mesh);
     }
 
+    public createCylinder(conf) {
+        conf = this.filterConfiguration(conf, 'cylinder');
+
+        // Cannon Body
+        let shape = new this.CANNON.Cylinder(conf.radiusTop, conf.radiusBottom, conf.height, conf.radiusSegments);
+        let mass = this.calculateMass(conf, shape.volume());
+
+        // Transform body to work with Three
+        let quat = new this.CANNON.Quaternion();
+        quat.setFromAxisAngle(new this.CANNON.Vec3(1,0,0), -Math.PI/2);
+        let translation = new this.CANNON.Vec3(0,0,0);
+        shape.transformAllPoints(translation, quat);
+
+        let body = new this.CANNON.Body({
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            mass: mass,
+            shape: shape,
+            position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
+            quaternion: new this.CANNON.Quaternion(conf.rotation[0], conf.rotation[1], conf.rotation[2]),
+            velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
+            linearDamping: 0.2,
+            angularDamping: 0.2,
+            allowSleep: true
+        });
+
+
+        // Three Mesh
+        let geometry = new this.THREE.CylinderGeometry(conf.radiusTop, conf.radiusBottom, conf.height, conf.radiusSegments);
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
+
+        this.instantiate(body, mesh);
+    }
+
     public createSphere(conf) {
-        conf = this.filterConfiguration(conf);
+        conf = this.filterConfiguration(conf, 'sphere');
 
         // Cannon Body
         let shape = new this.CANNON.Sphere(conf.radius);
@@ -144,13 +177,26 @@ export class SceneService {
         this.instantiate(body, mesh);
     };
 
-    private filterConfiguration(conf) {
+    private filterConfiguration(conf, type: string) {
         if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
         if (typeof conf.rotation == 'undefined') { conf.rotation = [0,0,0] };
-        if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-        if (typeof conf.static == 'undefined') { conf.static = false };
         if (typeof conf.material == 'undefined') { conf.material = 'concrete' };
         if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
+        if (typeof conf.static == 'undefined') { conf.static = false };
+        switch (type) {
+            case 'box':
+                break;
+            case 'cylinder':
+                if (typeof conf.radius == 'undefined') { conf.radius = 1 };
+                if (typeof conf.radiusTop == 'undefined') { conf.radiusTop = conf.radius };
+                if (typeof conf.radiusBottom == 'undefined') { conf.radiusBottom = conf.radius };
+                if (typeof conf.height == 'undefined') { conf.height = 1 };
+                if (typeof conf.radiusSegments == 'undefined') { conf.radiusSegments = 16 };
+                break;
+            case 'sphere':
+                if (typeof conf.radius == 'undefined') { conf.radius = 1 };
+                break
+        }
         return conf;
     }
 
