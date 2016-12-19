@@ -25,7 +25,7 @@ export class Player {
     
     private strength: number;
 
-    constructor(private scene: SceneService, private cannon: CannonService) {
+    constructor(private scene: SceneService, private camera: Camera, private cannon: CannonService) {
         this.CANNON = cannon.getCannon();
     }
 
@@ -78,13 +78,80 @@ export class Player {
             10);
         this.initialized = true;
     }
+    public jump() {
+        if (!this.isFalling()) {
+            this.feetBody.applyImpulse(new this.CANNON.Vec3(0, 150, 0), this.getFeetPosition());
+            this.midBody.applyImpulse(new this.CANNON.Vec3(0, 50, 0), this.getMidPosition());
+            this.headBody.applyImpulse(new this.CANNON.Vec3(0, 25, 0), this.getHeadPosition());
+        }
+    }
+
+    public getHeadPosition() {
+        return this.headBody.position;
+    }
+
+    public getMidPosition() {
+        return this.midBody.position;
+    }
+
+    public getFeetPosition() {
+        return this.feetBody.position;
+    }
+
+    public moveForward() {
+        if (this.isInitialized && !this.isFalling()) {
+            let direction = this.camera.getPitchObjDirection();
+            this.feetBody.applyForce(new this.CANNON.Vec3(-direction.x*100,0,-direction.z*100), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(-direction.x*100,0,-direction.z*100), this.getFeetPosition());
+        }
+    }
+
+    public moveBack() {
+        if (this.isInitialized && !this.isFalling()) {
+            let direction = this.camera.getPitchObjDirection();
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+        }
+    }
+
+    public moveLeft() {
+        if (this.isInitialized && !this.isFalling()) {
+            let direction = this.camera.getPitchObjDirection();
+            let x = direction.x;
+            let z = direction.z;
+            let d2r = Math.PI/180;
+            direction.x = x * Math.cos(-90 * d2r) + z * Math.sin(-90 * d2r);
+            direction.z = -x * Math.sin(-90 * d2r) + z * Math.cos(-90 * d2r);
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+        }
+    }
+
+    public moveRight() {
+        if (this.isInitialized && !this.isFalling()) {
+            let direction = this.camera.getPitchObjDirection();
+            let x = direction.x;
+            let z = direction.z;
+            let d2r = Math.PI/180;
+            direction.x = x * Math.cos(90 * d2r) + z * Math.sin(90 * d2r);
+            direction.z = -x * Math.sin(90 * d2r) + z * Math.cos(90 * d2r);
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+        }
+    }
 
     public isFalling(): boolean {
         let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
         return !(Math.round(feetVelocity) === 0);
     }
 
+    public getHeadQuaternion() {
+        return this.headBody.quaternion;
+    }
+
     public step() {
+      let headPosition = this.getHeadPosition();
+      this.camera.setCameraPosition(headPosition.x,headPosition.y,headPosition.z);
       if (this.isInitialized && !this.isFalling()) {
           this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), new this.CANNON.Vec3(0, 100, 0));
           this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), new this.CANNON.Vec3(0, -100, 0));
@@ -120,11 +187,13 @@ export class GameService {
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
-      this.camera.setCameraPosition(0,5,16);
       this.CANNON = this.cannon.getCannon();
+      this.camera.setCameraPosition(0,0,0);
 
       this.initLvl1();
       this.player.initialize([-25, 8, 0]);
+      let headPosition = this.player.getHeadPosition();
+      this.camera.setCameraPosition(headPosition.x,headPosition.y,headPosition.z);
   }
 
   public main(step) {
@@ -143,16 +212,23 @@ export class GameService {
       this.camera.cameraYaw(this.mouse.getMovementX());
       this.camera.cameraPitch(this.mouse.getMovementY());
       if (this.input.getKey('up').isDown()) {
-          this.camera.cameraMoveForward(2);
+          this.player.moveForward();
+          //this.camera.cameraMoveForward(2);
       }
       if (this.input.getKey('down').isDown()) {
-          this.camera.cameraMoveForward(-2);
+          this.player.moveBack();
+          //this.camera.cameraMoveForward(-2);
       }
       if (this.input.getKey('left').isDown()) {
-          this.camera.cameraMoveSideways(-2);
+          this.player.moveLeft();
+          //this.camera.cameraMoveSideways(-2);
       }
       if (this.input.getKey('right').isDown()) {
-          this.camera.cameraMoveSideways(2);
+          this.player.moveRight();
+          //this.camera.cameraMoveSideways(2);
+      }
+      if (this.input.getKey('space').isPressed()) {
+          this.player.jump();
       }
 
       this.camPos = this.camera.getCameraPosition();

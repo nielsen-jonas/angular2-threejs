@@ -78,6 +78,10 @@ export class Camera {
         return this.camera.getWorldDirection();
     }
 
+    public getPitchObjDirection() {
+        return this.pitchObj.getWorldDirection();
+    }
+
     public getSkybox() {
         return this.skybox.getSkybox();
     }

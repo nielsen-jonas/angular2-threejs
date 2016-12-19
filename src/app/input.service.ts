@@ -8,11 +8,13 @@ export class InputService {
         down: new KeyState,
         left: new KeyState,
         right: new KeyState,
-        shift: new KeyState
+        shift: new KeyState,
+        space: new KeyState,
     }; 
 
     constructor() { // TODO: Decouple from DOM
         window.addEventListener('keydown', (event) => {
+            event.preventDefault();
             let key = event.key.toLowerCase();
             switch (key) {
                 case 'w':
@@ -34,7 +36,11 @@ export class InputService {
                 case 'shift':
                     this.key.shift.press();
                     break;
+                case ' ':
+                    this.key.space.press();
+                    break;
             }
+            
         });
 
         window.addEventListener('keyup', (event) => {
@@ -59,6 +65,9 @@ export class InputService {
                 case 'shift':
                     this.key.shift.release();
                     break;
+                case ' ':
+                    this.key.space.release();
+                    break;
             }
         });
     }
@@ -69,6 +78,7 @@ export class InputService {
         this.key.left.flush();
         this.key.right.flush();
         this.key.shift.flush();
+        this.key.space.flush();
     }
 
     public getKey(key) {
