@@ -62,6 +62,16 @@ export class CannonService {
       let constraint = new this.CANNON.DistanceConstraint(this.bodies[id1], this.bodies[id2], distance, maxForce);
       this.world.addConstraint(constraint);
   }
+  
+  public coneTwistConstraintById(id1: number, id2: number, options = null) {
+      let constraint = new this.CANNON.ConeTwistConstraint(this.bodies[id1], this.bodies[id2], options);
+      this.world.addConstraint(constraint);
+  }
+
+  public lockConstraintById(id1: number, id2: number, options = null) {
+      let constraint = new this.CANNON.LockConstraint(this.bodies[id1], this.bodies[id2], options);
+      this.world.addConstraint(constraint);
+  }
 
   public step(fixedTimeStep: number, timeSinceLastCalled: number) {
       if (this.running) {

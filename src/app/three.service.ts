@@ -9,6 +9,7 @@ export class Camera {
     private step: number;
     private zoom: number = 1;
     private pitchObj: any;
+    private shellObj: any;
     private camMoveSpd: number;
     private skybox: Skybox;
 
@@ -20,6 +21,9 @@ export class Camera {
         this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, 0.1, 1000);
         this.pitchObj = new this.THREE.Object3D();
         this.pitchObj.add(this.camera);
+        this.shellObj = new this.THREE.Object3D();
+        this.shellObj.add(this.pitchObj);
+
         this.skybox = new Skybox(THREE);
         this.skybox.load();
     }
@@ -30,9 +34,9 @@ export class Camera {
     }
 
     public setCameraPosition(x: number, y: number, z: number) {
-        this.pitchObj.position.x = x;
-        this.pitchObj.position.y = y;
-        this.pitchObj.position.z = z;
+        this.shellObj.position.x = x;
+        this.shellObj.position.y = y;
+        this.shellObj.position.z = z;
     }
 
     public cameraYaw(amount) {
@@ -68,6 +72,17 @@ export class Camera {
 
     public getCam() {
         return this.pitchObj;
+    }
+
+    public getShell() {
+        return this.shellObj;
+    }
+
+    public setShellQuaternion(x, y, z, w) {
+        this.shellObj.quaternion.x = x;
+        this.shellObj.quaternion.y = y;
+        this.shellObj.quaternion.z = z;
+        this.shellObj.quaternion.w = w;
     }
 
     public getCameraPosition() {
@@ -157,7 +172,7 @@ export class ThreeService {
     public initialize() {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
         this.scene.add(this.cam.getSkybox());
-        this.scene.add(this.cam.getCam());
+        this.scene.add(this.cam.getShell());
     }
 
     public getDomElement() {

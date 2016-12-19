@@ -42,6 +42,7 @@ export class GameComponent implements OnInit {
       private three: ThreeService,
       private scene: SceneService,
       private game: GameService,
+      private player: Player,
       private input: InputService,
       private mouse: MouseService) {
 
