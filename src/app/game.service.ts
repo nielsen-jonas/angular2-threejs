@@ -34,7 +34,7 @@ export class Player {
 
     public initialize(position: number[] = [0,0,0]) {
         this.feetId = this.scene.createSphere({
-            position: [position[0],position[1],position[3]],
+            position: [position[0],position[1],position[2]],
             fixedRotation: true,
             linearDamping: .6,
             angularDamping: .6,
@@ -46,7 +46,7 @@ export class Player {
             position: [
                 position[0],
                 position[1]+this.feetRadius+this.midRadius+this.partsDistance,
-                position[3]],
+                position[2]],
             fixedRotation: true,
             linearDamping: .6,
             angularDamping: .6,
@@ -58,7 +58,7 @@ export class Player {
             position: [
                 position[0],
                 position[1]+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
-                position[3]],
+                position[2]],
             fixedRotation: true,
             linearDamping: .6,
             angularDamping: .6,
@@ -222,9 +222,9 @@ export class Player {
       this.camera.setCameraPosition(headPosition.x-2.5*direction.x,headPosition.y+.8,headPosition.z-2.5*direction.z);
       //this.camera.setShellQuaternion(headQuaternion.x, headQuaternion.y, headQuaternion.z, headQuaternion.w);
       if (this.isInitialized && this.isNotFallingVeryMuch()) {
-          this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), new this.CANNON.Vec3(0, 100, 0));
-          this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), new this.CANNON.Vec3(0, -100, 0));
-          this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), new this.CANNON.Vec3(0, -100, 0));
+          this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), this.feetBody.position);
+          this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), this.midBody.position);
+          this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), this.headBody.position);
       }
     }
 
@@ -259,7 +259,7 @@ export class GameService {
       this.camera.setCameraPosition(0,0,0);
 
       this.initLvl1();
-      this.player.initialize([-25, 8, 0]);
+      this.player.initialize([-2.5, 3, 6.5]);
   }
 
   public main(step) {
@@ -304,14 +304,14 @@ export class GameService {
 
   private initLvl1() {
       this.scene.createBox({
-          position: [16, 5, .5],
+          position: [16, 5, .4],
           dimensions: [.2, 1, 1],
           static: true,
           material: 'spring'
       });
       
       this.scene.createBox({
-          position: [9,-2, 3],
+          position: [9,-2, 2.6],
           dimensions: [1,.1,1],
           static: true,
           material: 'spring'
@@ -332,7 +332,7 @@ export class GameService {
       });
       this.scene.createBox({
           position: [6.2,2,0],
-          dimensions: [5,.1,.2],
+          dimensions: [5,.1,.4],
           rotation: [0,0,.1],
           static: true,
           material: 'concrete'
@@ -340,8 +340,8 @@ export class GameService {
 
       // Step
       this.scene.createBox({
-          position: [-2,-1.3,6.5],
-          dimensions: [1.5,.2,1.5],
+          position: [-2.5,-1.3,6.5],
+          dimensions: [.8,.2,1.5],
           static: true,
           material: 'concrete'
       });
@@ -349,8 +349,8 @@ export class GameService {
       for (let x = -15; x < 0; x += 6.5){
           // floors
           this.scene.createBox({
-              position: [x,-1,0],
-              dimensions: [1.5,.3,5],
+              position: [x-.5,-1,0],
+              dimensions: [.8,.3,5],
               static: true,
               material: 'concrete' 
           });
@@ -358,8 +358,8 @@ export class GameService {
           for (let z = -2; z < 3; z += 1) {
               // pillars
               this.scene.createBox({
-                  position: [x,3.5,z],
-                  dimensions: [.3,3,.3],
+                  position: [x,4,z],
+                  dimensions: [.3,3.5,.4],
                   material: 'concrete' 
               });
           }

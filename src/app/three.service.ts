@@ -18,7 +18,7 @@ export class Camera {
 
     public initialize(THREE, windowAspect) {
         this.THREE = THREE;
-        this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, 0.1, 1000);
+        this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 1000);
         this.pitchObj = new this.THREE.Object3D();
         this.pitchObj.add(this.camera);
         this.shellObj = new this.THREE.Object3D();
