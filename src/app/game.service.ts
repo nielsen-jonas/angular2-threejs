@@ -18,15 +18,24 @@ export class Player {
     private midBody: any;
     private feetBody: any;
 
+    private camPos = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
     private headRadius: number = .2;
     private midRadius: number = .25;
     private feetRadius: number = .3;
-    private partsDistance: number = .05;
+    private partsDistance: number = .02;
     
     private strength: number;
     private chargeMin: number = 5;
     private chargeMax: number = 20;
     private charge = this.chargeMin;
+    private moveSpd = 150;
+    private moveSpd2 = 75;
+    private jumpTimer = 0;
 
     constructor(private input: InputService, private mouse: MouseService, private scene: SceneService, private camera: Camera, private cannon: CannonService) {
         this.CANNON = cannon.getCannon();
@@ -36,8 +45,6 @@ export class Player {
         this.feetId = this.scene.createSphere({
             position: [position[0],position[1],position[2]],
             fixedRotation: true,
-            linearDamping: .6,
-            angularDamping: .6,
             radius: this.feetRadius,
             material: 'player'
         })[0];
@@ -48,8 +55,6 @@ export class Player {
                 position[1]+this.feetRadius+this.midRadius+this.partsDistance,
                 position[2]],
             fixedRotation: true,
-            linearDamping: .6,
-            angularDamping: .6,
             radius: this.midRadius,
             material: 'player'
         })[0];
@@ -60,8 +65,6 @@ export class Player {
                 position[1]+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
                 position[2]],
             fixedRotation: true,
-            linearDamping: .6,
-            angularDamping: .6,
             radius: this.headRadius,
             material: 'player'
         })[0];
@@ -72,13 +75,13 @@ export class Player {
 
         this.cannon.distanceConstraintById(this.feetId, this.midId,
             this.feetRadius+this.midRadius+this.partsDistance,
-            10);
+            20);
         this.cannon.distanceConstraintById(this.midId, this.headId,
             this.midRadius+this.headRadius+this.partsDistance,
-            10);
+            20);
         this.cannon.distanceConstraintById(this.feetId, this.headId,
             this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
-            10);
+            20);
 
         // this.cannon.coneTwistConstraintById(this.feetId, this.midId, {
         //     maxForce: 10,
@@ -93,12 +96,14 @@ export class Player {
         this.initialized = true;
     }
     public jump() {
-        if (!this.isFalling()) {
+        if (!this.isFalling() && this.jumpTimer <= 0) {
             let direction = this.camera.getPitchObjDirection();
-            let mult = 15;
-            this.feetBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, 60, -direction.z*mult), this.getFeetPosition());
-            this.midBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, 60, -direction.z*mult), this.getMidPosition());
-            this.headBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, 60, -direction.z*mult), this.getHeadPosition());
+            let mult = 5;
+            let height = 60;
+            this.feetBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getFeetPosition());
+            this.midBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getMidPosition());
+            this.headBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getHeadPosition());
+            this.jumpTimer = .7;
         }
     }
 
@@ -132,16 +137,18 @@ export class Player {
     public moveForward() {
         if (this.isInitialized && this.isNotFallingVeryMuch()) {
             let direction = this.camera.getPitchObjDirection();
-            this.feetBody.applyForce(new this.CANNON.Vec3(-direction.x*100,0,-direction.z*100), this.getFeetPosition());
-            this.headBody.applyForce(new this.CANNON.Vec3(-direction.x*100,0,-direction.z*100), this.getFeetPosition());
+            this.feetBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd,0,-direction.z*this.moveSpd), this.getFeetPosition());
+            this.midBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd*.5,0,-direction.z*this.moveSpd), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd,0,-direction.z*this.moveSpd), this.getFeetPosition());
         }
     }
 
     public moveBack() {
         if (this.isInitialized && this.isNotFallingVeryMuch()) {
             let direction = this.camera.getPitchObjDirection();
-            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
-            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.midBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2*.5,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
         }
     }
 
@@ -153,8 +160,9 @@ export class Player {
             let d2r = Math.PI/180;
             direction.x = x * Math.cos(-90 * d2r) + z * Math.sin(-90 * d2r);
             direction.z = -x * Math.sin(-90 * d2r) + z * Math.cos(-90 * d2r);
-            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
-            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.midBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2*.5,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
         }
     }
 
@@ -166,19 +174,20 @@ export class Player {
             let d2r = Math.PI/180;
             direction.x = x * Math.cos(90 * d2r) + z * Math.sin(90 * d2r);
             direction.z = -x * Math.sin(90 * d2r) + z * Math.cos(90 * d2r);
-            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
-            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*50,0,direction.z*50), this.getFeetPosition());
+            this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.midBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2*.5,0,direction.z*this.moveSpd2), this.getFeetPosition());
+            this.headBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
         }
     }
 
     public isFalling(): boolean {
         let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
-        return !(Math.round(feetVelocity) === 0);
+        return (Math.abs(feetVelocity) > 1);
     }
 
     public isNotFallingVeryMuch(): boolean {
         let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
-        return (Math.abs(feetVelocity) < 2);
+        return (Math.abs(feetVelocity) < 2.5);
     }
 
     public getHeadQuaternion() {
@@ -186,6 +195,13 @@ export class Player {
     }
 
     public step(step) {
+      let headPosition = this.getHeadPosition();
+      let direction = this.camera.getCameraDirection();
+      this.camPos.x = headPosition.x-2.5*direction.x;
+      this.camPos.y = headPosition.y+.8;
+      this.camPos.z = headPosition.z-2.5*direction.z;
+      this.camera.moveTowards(this.camPos);
+
       if (this.input.getKey('up').isDown()) {
           this.moveForward();
       }
@@ -198,7 +214,7 @@ export class Player {
       if (this.input.getKey('right').isDown()) {
           this.moveRight();
       }
-      if (this.input.getKey('space').isPressed()) {
+      if (this.input.getKey('space').isDown()) {
           this.jump();
       }
 
@@ -215,18 +231,37 @@ export class Player {
           this.charge = this.chargeMin;
       }
 
-      let headPosition = this.getHeadPosition();
       //let headQuaternion = this.getHeadQuaternion();
       //this.camera.setCameraPosition(headPosition.x,headPosition.y,headPosition.z);
-      let direction = this.camera.getCameraDirection();
-      this.camera.setCameraPosition(headPosition.x-2.5*direction.x,headPosition.y+.8,headPosition.z-2.5*direction.z);
       //this.camera.setShellQuaternion(headQuaternion.x, headQuaternion.y, headQuaternion.z, headQuaternion.w);
-      if (this.isInitialized && this.isNotFallingVeryMuch()) {
-          this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -250, 0), this.feetBody.position);
-          this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 150, 0), this.midBody.position);
-          this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), this.headBody.position);
+      if (this.isInitialized) {
+          if (this.isNotFallingVeryMuch() || this.jumpTimer > 0) {
+              this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -400, 0), this.feetBody.position);
+              this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 300, 0), this.midBody.position);
+              this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), this.headBody.position);
+          }
+          if (this.isNotFallingVeryMuch()) {
+              if (this.feetBody.linearDamping != 0.9) {
+                  this.feetBody.linearDamping = 0.9;
+                  this.midBody.linearDamping = 0.9;
+                  this.headBody.linearDamping = 0.9;
+              }
+          } else {
+              if (this.feetBody.linearDamping != 0.01) {
+                  this.feetBody.linearDamping = 0.01;
+                  this.midBody.linearDamping = 0.01;
+                  this.headBody.linearDamping = 0.01;
+              }
+          }
       }
+
+      if (this.jumpTimer > 0) {
+          this.jumpTimer -= step;
+      } 
     }
+    public getCamPos() {
+        return this.camPos;
+    };
 
     public isInitialized(): boolean {
         return this.initialized;
@@ -259,7 +294,7 @@ export class GameService {
       this.camera.setCameraPosition(0,0,0);
 
       this.initLvl1();
-      this.player.initialize([-2.5, 3, 6.5]);
+      this.player.initialize([-2.5, 50, 6.5]);
   }
 
   public main(step) {
@@ -310,18 +345,11 @@ export class GameService {
           material: 'spring'
       });
       
-      this.scene.createBox({
-          position: [9,-2, 2.6],
-          dimensions: [1,.1,1],
-          static: true,
-          material: 'spring'
-      });
-
-
       this.scene.createSphere({
           position: [11,6,0],
           radius: 1,
-          material: 'concrete'
+          material: 'concrete',
+          angularDamping: 0.01
       });
       
       this.scene.createBox({
@@ -340,13 +368,13 @@ export class GameService {
 
       // Step
       this.scene.createBox({
-          position: [-2.5,-1.3,6.5],
-          dimensions: [.8,.2,1.5],
+          position: [-2.5,-1.5,6.5],
+          dimensions: [.8,.3,1.5],
           static: true,
           material: 'concrete'
       });
 
-      for (let x = -15; x < 0; x += 6.5){
+      for (let x = -30; x < 10; x += 10){
           // floors
           this.scene.createBox({
               position: [x-.5,-1,0],
@@ -358,15 +386,15 @@ export class GameService {
           for (let z = -2; z < 3; z += 1) {
               // pillars
               this.scene.createBox({
-                  position: [x,4,z],
-                  dimensions: [.3,3.5,.4],
+                  position: [x,7,z],
+                  dimensions: [.3,6,.45],
                   material: 'concrete' 
               });
           }
       }
 
       // floors
-      for (let x = -35; x < -15; x += 10){
+      for (let x = -55; x < -35; x += 10){
           this.scene.createBox({
               position: [x,0,0],
               dimensions: [5,.3,5],

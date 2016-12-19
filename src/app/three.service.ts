@@ -21,8 +21,6 @@ export class Camera {
         this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 1000);
         this.pitchObj = new this.THREE.Object3D();
         this.pitchObj.add(this.camera);
-        this.shellObj = new this.THREE.Object3D();
-        this.shellObj.add(this.pitchObj);
 
         this.skybox = new Skybox(THREE);
         this.skybox.load();
@@ -31,12 +29,27 @@ export class Camera {
     public setStep(step) {
         this.step = step;
         this.camMoveSpd = step * 4;
+        this.skybox.updatePosition(this.pitchObj.position.x, this.pitchObj.position.y, this.pitchObj.position.z);
     }
 
     public setCameraPosition(x: number, y: number, z: number) {
-        this.shellObj.position.x = x;
-        this.shellObj.position.y = y;
-        this.shellObj.position.z = z;
+        this.pitchObj.position.x = x;
+        this.pitchObj.position.y = y;
+        this.pitchObj.position.z = z;
+    }
+
+    public moveTowards(position) {
+        let xDistance = position.x - this.pitchObj.position.x;
+        let yDistance = position.y - this.pitchObj.position.y;
+        let zDistance = position.z - this.pitchObj.position.z;
+        let min = .01;
+        let distance = Math.sqrt(xDistance * xDistance + yDistance * yDistance + zDistance * zDistance);
+        let easingAmount = .2;
+        if (distance > .01) {
+            this.pitchObj.position.x += xDistance * easingAmount;
+            this.pitchObj.position.y += yDistance * easingAmount;
+            this.pitchObj.position.z += zDistance * easingAmount;
+        }
     }
 
     public cameraYaw(amount) {
@@ -72,17 +85,6 @@ export class Camera {
 
     public getCam() {
         return this.pitchObj;
-    }
-
-    public getShell() {
-        return this.shellObj;
-    }
-
-    public setShellQuaternion(x, y, z, w) {
-        this.shellObj.quaternion.x = x;
-        this.shellObj.quaternion.y = y;
-        this.shellObj.quaternion.z = z;
-        this.shellObj.quaternion.w = w;
     }
 
     public getCameraPosition() {
@@ -172,7 +174,7 @@ export class ThreeService {
     public initialize() {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
         this.scene.add(this.cam.getSkybox());
-        this.scene.add(this.cam.getShell());
+        this.scene.add(this.cam.getCam());
     }
 
     public getDomElement() {
@@ -245,10 +247,10 @@ export class Skybox {
         return this.skybox;
     }
 
-    public updatePosition(x, y, z) {
-        this.skybox.position.x = x;
-        this.skybox.position.y = y;
-        this.skybox.position.z = z;
+    public updatePosition(x = null, y = null, z = null) {
+        if (x) {this.skybox.position.x = x;}
+        if (y) {this.skybox.position.y = y;}
+        if (z) {this.skybox.position.z = z;}
     }
 
     public load() {
