@@ -10,6 +10,7 @@ export class InputService {
         right: new KeyState,
         shift: new KeyState,
         space: new KeyState,
+        toggleCamera: new KeyState
     }; 
 
     constructor() { // TODO: Decouple from DOM
@@ -38,6 +39,9 @@ export class InputService {
                     break;
                 case ' ':
                     this.key.space.press();
+                    break;
+                case 'q':
+                    this.key.toggleCamera.press();
                     break;
             }
             
@@ -68,6 +72,9 @@ export class InputService {
                 case ' ':
                     this.key.space.release();
                     break;
+                case 'q':
+                    this.key.toggleCamera.release();
+                    break;
             }
         });
     }
@@ -79,6 +86,7 @@ export class InputService {
         this.key.right.flush();
         this.key.shift.flush();
         this.key.space.flush();
+        this.key.toggleCamera.flush();
     }
 
     public getKey(key) {

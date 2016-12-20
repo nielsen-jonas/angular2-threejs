@@ -94,6 +94,14 @@ export class SceneService {
         this.addContactMaterials(this.cannonContactMaterials);
     }
 
+    public clear() {
+        for (let i = 0, len = this.objects.length; i < len; i++) {
+            this.removeObject(i);
+        }
+        this.objects = [];
+    }
+
+
     public update() {
         for (let i = 0, len = this.objects.length; i < len; i++) {
             let body = this.cannon.getBodyById(this.objects[i][0]);

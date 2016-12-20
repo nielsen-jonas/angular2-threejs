@@ -7,10 +7,9 @@ export class CannonService {
 
     private world: any;
     private bodies: any[] = [];
+    private contactMaterials: any[] = [];
 
     private running: boolean = false;
-
-    private contactMaterials: any[] = [];
 
   constructor() { }
 

@@ -18,12 +18,15 @@ export class Player {
     private headBody: any;
     private midBody: any;
     private feetBody: any;
+    private ballObjects: any[] = [];
 
     private camPos = {
         x: 0,
         y: 0,
         z: 0
     };
+
+    private fpsCameraMode = true;
 
     private headRadius: number = .2;
     private midRadius: number = .25;
@@ -96,6 +99,33 @@ export class Player {
 
         this.initialized = true;
     }
+
+    public clearBalls() {
+        for (let i = 0, len = this.ballObjects.length; i < len; i++) {
+            this.scene.removeObjectByBodyId(this.ballObjects[i][0]);
+        }
+        this.ballObjects = [];
+    }
+
+    public destroy() {
+        this.clearBalls();
+        this.scene.removeObjectByBodyId(this.feetId);
+        this.scene.removeObjectByBodyId(this.midId);
+        this.scene.removeObjectByBodyId(this.headId);
+        this.initialized = false;
+    }
+
+    public setPosition(position = {x: 0, y: 0, z: 0}) {
+        this.feetBody.position.x = this.midBody.position.x = this.headBody.position.x = position.x;
+        this.feetBody.position.z = this.midBody.position.z = this.headBody.position.z = position.z;
+        this.feetBody.position.y = position.y;
+        this.midBody.position.y = position.y + this.feetRadius+this.midRadius+this.partsDistance;
+        this.headBody.position.y = position.y + this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2;
+        this.feetBody.velocity = new this.CANNON.Vec3(0,0,0);
+        this.midBody.velocity = new this.CANNON.Vec3(0,0,0);
+        this.headBody.velocity = new this.CANNON.Vec3(0,0,0);
+    }
+
     public jump() {
         if (!this.isFalling() && this.jumpTimer <= 0) {
             let direction = this.camera.getPitchObjDirection();
@@ -104,19 +134,19 @@ export class Player {
             this.feetBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getFeetPosition());
             this.midBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getMidPosition());
             this.headBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getHeadPosition());
-            this.jumpTimer = .7;
+            this.jumpTimer = .8;
         }
     }
 
     private fire() {
         let direction = this.camera.getCameraDirection();
-        this.scene.createSphere({
+        this.ballObjects.push(this.scene.createSphere({
             position: [this.headBody.position.x, this.headBody.position.y+this.headRadius+.15, this.headBody.position.z],
             rotation: [direction.x, direction.y, direction.z],
             velocity: [this.charge*direction.x, this.charge*direction.y+3, this.charge*direction.z],
             radius: 0.12,
             material: 'soccer-ball'
-        });
+        }));
     }
 
     public getCharge() {
@@ -196,40 +226,60 @@ export class Player {
     }
 
     public step(step) {
+      if (this.input.getKey('toggleCamera').isPressed()) {
+          this.fpsCameraMode = !this.fpsCameraMode;
+          if (this.fpsCameraMode == false) {
+              this.camera.move(-50);
+          }
+      }
       let headPosition = this.getHeadPosition();
       let direction = this.camera.getCameraDirection();
       this.camPos.x = headPosition.x-2.5*direction.x;
       this.camPos.y = headPosition.y+.8;
       this.camPos.z = headPosition.z-2.5*direction.z;
-      this.camera.moveTowards(this.camPos);
+      if (this.fpsCameraMode){
+          this.camera.moveTowards(this.camPos);
 
-      if (this.input.getKey('up').isDown()) {
-          this.moveForward();
-      }
-      if (this.input.getKey('down').isDown()) {
-          this.moveBack();
-      }
-      if (this.input.getKey('left').isDown()) {
-          this.moveLeft();
-      }
-      if (this.input.getKey('right').isDown()) {
-          this.moveRight();
-      }
-      if (this.input.getKey('space').isDown()) {
-          this.jump();
-      }
-
-      if (this.mouse.getButton('left').isDown()) {
-          this.charge += step*10;
-          if (this.charge > this.chargeMax) {
-              this.charge = this.chargeMax;
+          if (this.input.getKey('up').isDown()) {
+              this.moveForward();
           }
-      }
+          if (this.input.getKey('down').isDown()) {
+              this.moveBack();
+          }
+          if (this.input.getKey('left').isDown()) {
+              this.moveLeft();
+          }
+          if (this.input.getKey('right').isDown()) {
+              this.moveRight();
+          }
+          if (this.input.getKey('space').isDown()) {
+              this.jump();
+          }
 
-      
-      if (this.mouse.getButton('left').isReleased()) {
-          this.fire();
-          this.charge = this.chargeMin;
+          if (this.mouse.getButton('left').isDown()) {
+              this.charge += step*10;
+              if (this.charge > this.chargeMax) {
+                  this.charge = this.chargeMax;
+              }
+          }
+
+          if (this.mouse.getButton('left').isReleased()) {
+              this.fire();
+              this.charge = this.chargeMin;
+          }
+      } else {
+          if (this.input.getKey('up').isDown()) {
+              this.camera.move(2);
+          }
+          if (this.input.getKey('down').isDown()) {
+              this.camera.move(-2);
+          }
+          if (this.input.getKey('left').isDown()) {
+              this.camera.strafe(-2);
+          }
+          if (this.input.getKey('right').isDown()) {
+              this.camera.strafe(2);
+          }
       }
 
       //let headQuaternion = this.getHeadQuaternion();
@@ -287,7 +337,9 @@ export class GameService {
       private scene: SceneService,
       private input: InputService,
       private mouse: MouseService,
-      private player: Player) { }
+      private player: Player) {
+          this.level.push(new Level(this.scene, lvl0));
+      }
 
       private level: Level[] = [];
 
@@ -296,7 +348,6 @@ export class GameService {
       this.CANNON = this.cannon.getCannon();
       this.camera.setCameraPosition(0,0,0);
 
-      this.level.push(new Level(this.scene, lvl0));
       this.level[0].initialize();
       //this.player.initialize([-2.5, 50, 6.5]);
       let startPos = this.level[0].getStartingPosition();
@@ -341,6 +392,13 @@ export class GameService {
       }
       
       this.player.step(step);
+      if (this.mouse.getButton('right').isPressed() || this.player.getFeetPosition().y < -50) {
+          this.level[0].clear();
+          this.player.destroy();
+          this.scene.clear();
+          this.level[0].initialize();
+          this.player.initialize(this.level[0].getStartingPosition());
+      }
   }
 
 }
@@ -350,26 +408,42 @@ export class Level {
     private initialized: boolean = false;
     private completed: boolean = false;
     private blueprint: Function; 
+    private objects: any[] = [];
     private startingPosition = {
         x: 0,
         y: 0,
         z: 0 
     };
+
     constructor(scene, blueprint: Function) {
         this.scene = scene;
         this.blueprint = blueprint;
     }
+
     public initialize() {
         this.blueprint();
         this.initialized = true;
     } 
+
     public isInitialized(): boolean {
         return this.initialized;
     }
+
     public isComplete(): boolean {
         return this.completed;
     }
+
+    public clear() {
+        for (let i = 0, len = this.objects.length; i < len; i++) {
+            this.scene.removeObjectByBodyId(this.objects[i][0]);
+        }
+        this.objects = [];
+    }
+
     public restart() {
+        this.clear();
+        this.blueprint();
+        this.initialized = true;
     }
     public getStartingPosition() {
         return this.startingPosition;

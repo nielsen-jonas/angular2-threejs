@@ -66,14 +66,14 @@ export class Camera {
         }
     } 
 
-    public cameraMoveForward(amount) {
+    public move(amount) {
         this.pitchObj.translateZ(-amount*this.camMoveSpd);
         this.pitchObj.translateY(amount*this.camera.rotation.x*this.camMoveSpd);
           let pos = this.pitchObj.position;
           this.skybox.updatePosition(pos.x, pos.y, pos.z);
     }
 
-    public cameraMoveSideways(amount) {
+    public strafe(amount) {
         this.pitchObj.translateX(amount*this.camMoveSpd);
           let pos = this.pitchObj.position;
           this.skybox.updatePosition(pos.x, pos.y, pos.z);
@@ -143,6 +143,10 @@ export class ThreeService {
     private meshes: any[] = [];
 
   constructor(private window: WindowService, private cam: Camera) {
+      this.init();
+  }
+
+  private init() {
         this.scene = new this.THREE.Scene();
         this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
         this.renderer.autoclear = true;
