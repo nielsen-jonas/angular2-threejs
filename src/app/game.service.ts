@@ -4,6 +4,7 @@ import { ThreeService, Camera } from './three.service';
 import { SceneService } from './scene.service';
 import { InputService } from './input.service';
 import { MouseService } from './mouse.service';
+import { lvl0 } from './levels/lvl_0';
 
 @Injectable()
 export class Player {
@@ -41,9 +42,9 @@ export class Player {
         this.CANNON = cannon.getCannon();
     }
 
-    public initialize(position: number[] = [0,0,0]) {
+    public initialize(position = {x: 0, y: 0, z: 0}) {
         this.feetId = this.scene.createSphere({
-            position: [position[0],position[1],position[2]],
+            position: [position.x,position.y,position.z],
             fixedRotation: true,
             radius: this.feetRadius,
             material: 'player'
@@ -51,9 +52,9 @@ export class Player {
 
         this.midId = this.scene.createSphere({
             position: [
-                position[0],
-                position[1]+this.feetRadius+this.midRadius+this.partsDistance,
-                position[2]],
+                position.x,
+                position.y+this.feetRadius+this.midRadius+this.partsDistance,
+                position.z],
             fixedRotation: true,
             radius: this.midRadius,
             material: 'player'
@@ -61,9 +62,9 @@ export class Player {
 
         this.headId = this.scene.createSphere({
             position: [
-                position[0],
-                position[1]+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
-                position[2]],
+                position.x,
+                position.y+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
+                position.z],
             fixedRotation: true,
             radius: this.headRadius,
             material: 'player'
@@ -288,13 +289,18 @@ export class GameService {
       private mouse: MouseService,
       private player: Player) { }
 
+      private level: Level[] = [];
+
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
       this.CANNON = this.cannon.getCannon();
       this.camera.setCameraPosition(0,0,0);
 
-      this.initLvl1();
-      this.player.initialize([-2.5, 50, 6.5]);
+      this.level.push(new Level(this.scene, lvl0));
+      this.level[0].initialize();
+      //this.player.initialize([-2.5, 50, 6.5]);
+      let startPos = this.level[0].getStartingPosition();
+      this.player.initialize(startPos);
   }
 
   public main(step) {
@@ -337,71 +343,37 @@ export class GameService {
       this.player.step(step);
   }
 
-  private initLvl1() {
-      this.scene.createBox({
-          position: [16, 5, .4],
-          dimensions: [.2, 1, 1],
-          static: true,
-          material: 'spring'
-      });
-      
-      this.scene.createSphere({
-          position: [11,6,0],
-          radius: 1,
-          material: 'concrete',
-          angularDamping: 0.01
-      });
-      
-      this.scene.createBox({
-          position: [11, 3.2, 0],
-          dimensions: [.04,.2,.04],
-          static: true,
-          material: 'concrete'
-      });
-      this.scene.createBox({
-          position: [6.2,2,0],
-          dimensions: [5,.1,.4],
-          rotation: [0,0,.1],
-          static: true,
-          material: 'concrete'
-      });
-
-      // Step
-      this.scene.createBox({
-          position: [-2.5,-1.5,6.5],
-          dimensions: [.8,.3,1.5],
-          static: true,
-          material: 'concrete'
-      });
-
-      for (let x = -30; x < 10; x += 10){
-          // floors
-          this.scene.createBox({
-              position: [x-.5,-1,0],
-              dimensions: [.8,.3,5],
-              static: true,
-              material: 'concrete' 
-          });
-
-          for (let z = -2; z < 3; z += 1) {
-              // pillars
-              this.scene.createBox({
-                  position: [x,7,z],
-                  dimensions: [.3,6,.45],
-                  material: 'concrete' 
-              });
-          }
-      }
-
-      // floors
-      for (let x = -55; x < -35; x += 10){
-          this.scene.createBox({
-              position: [x,0,0],
-              dimensions: [5,.3,5],
-              static: true,
-              material: 'concrete' 
-          });
-      }
-  }
-
 }
+
+export class Level {
+    private scene;
+    private initialized: boolean = false;
+    private completed: boolean = false;
+    private blueprint: Function; 
+    private startingPosition = {
+        x: 0,
+        y: 0,
+        z: 0 
+    };
+    constructor(scene, blueprint: Function) {
+        this.scene = scene;
+        this.blueprint = blueprint;
+    }
+    public initialize() {
+        this.blueprint();
+        this.initialized = true;
+    } 
+    public isInitialized(): boolean {
+        return this.initialized;
+    }
+    public isComplete(): boolean {
+        return this.completed;
+    }
+    public restart() {
+    }
+    public getStartingPosition() {
+        return this.startingPosition;
+    }
+}
+
+
