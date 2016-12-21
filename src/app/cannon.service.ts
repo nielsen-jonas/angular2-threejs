@@ -23,6 +23,7 @@ export class CannonService {
     //this.world.broadphase = new this.CANNON.NaiveBroadphase();
     this.world.solver.tolerance = 0;
     this.world.solver.iterations = 20;
+    this.world.allowSleep = true;
     //this.world.defaultContactMaterial.contactEquationStiffness = 1e8;
     //this.world.defaultContactMaterial.contactEquationRegularizationTime = 1;
     for (let i = 0, len = this.contactMaterials.length; i < len; i++) {

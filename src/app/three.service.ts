@@ -7,7 +7,10 @@ export class Camera {
     private THREE;
     private camera: any;
     private step: number;
-    private zoom: number = 1;
+    private _zoomMin: number = 1;
+    private _zoomMax: number = 2.2;
+    private _zoomSpd: number = 12;
+    private zoom: number = this._zoomMin;
     private pitchObj: any;
     private shellObj: any;
     private camMoveSpd: number;
@@ -112,10 +115,10 @@ export class Camera {
     }
 
     public zoomIn() {
-        this.zoom += this.step*8; 
-        if (this.zoom != 2) {
-            if (this.zoom > 2) {
-                this.zoom = 2;
+        this.zoom += this.step*this._zoomSpd; 
+        if (this.zoom != this._zoomMax) {
+            if (this.zoom > this._zoomMax) {
+                this.zoom = this._zoomMax;
             }
             this.camera.zoom = this.zoom;
             this.camera.updateProjectionMatrix();
@@ -123,7 +126,7 @@ export class Camera {
     }
 
     public zoomOff() {
-        this.zoom = 1;
+        this.zoom = this._zoomMin;
         this.camera.zoom = this.zoom;
         this.camera.updateProjectionMatrix();
     } 

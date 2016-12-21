@@ -1,62 +1,43 @@
+export function getRandomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
 
 export let lvl0 = function() {
     this.startingPosition = {
-        x: -2.5,
-        y: 50,
-        z: 6.5 
+        x: 0,
+        y: 15,
+        z: 0 
     };
 
-    this.objects.push(this.scene.createBox({
-        position: [16, 5, .4],
-        dimensions: [.2, 1, 1],
-        static: true,
-        material: 'spring'
-    }));
-    
-    this.objects.push(this.scene.createSphere({
-        position: [11,6,0],
-        radius: 1,
+    // Cylinder
+    this.objects.push(this.scene.createCylinder({
+        position: [35,47,0],
+        rotation: [1,0,0],
+        velocity: [-10,0,0],
+        radius: 1.4,
+        height: 4,
         material: 'concrete',
-        angularDamping: 0.01
+        radiusSegments: 32,
+        angularDamping: 0.0,
+        linearDamping: 0.0
     }));
     
+    // Plank
     this.objects.push(this.scene.createBox({
-        position: [11, 3.2, 0],
-        dimensions: [.04,.2,.04],
-        static: true,
-        material: 'concrete'
-    }));
-    this.objects.push(this.scene.createBox({
-        position: [6.2,2,0],
-        dimensions: [5,.1,.4],
-        rotation: [0,0,.1],
+        position: [6.2,4,0],
+        dimensions: [5,.5,2],
+        rotation: [0,0,.2],
         static: true,
         material: 'concrete'
     }));
 
-    // Step
-    this.objects.push(this.scene.createBox({
-        position: [-2.5,-2.7,1.5],
-        dimensions: [1.2,2,6.5],
-        static: true,
-        material: 'concrete'
-    }));
-
-    for (let x = -30; x < 10; x += 10){
+    for (let x = -36; x < 2; x += 12){
         // floors
         this.objects.push(this.scene.createBox({
             position: [x-.5,-1,0],
             dimensions: [.8,.3,5],
             static: true,
             material: 'concrete' 
-        }));
-
-        // spring
-        this.objects.push(this.scene.createBox({
-            position: [x-7, -1.5,6],
-            dimensions: [1, .2, 1],
-            static: true,
-            material: 'spring'
         }));
 
         for (let z = -2; z < 3; z += 1) {
@@ -70,9 +51,9 @@ export let lvl0 = function() {
     }
 
     // floors
-    for (let x = -55; x < -35; x += 10){
+    for (let x = -60; x < -40; x += 10){
         this.objects.push(this.scene.createBox({
-            position: [x,0,0],
+            position: [x,1,0],
             dimensions: [5,.3,5],
             static: true,
             material: 'concrete' 

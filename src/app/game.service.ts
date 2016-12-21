@@ -37,13 +37,19 @@ export class Player {
     private strength: number;
     private chargeMin: number = 5;
     private chargeMax: number = 20;
-    private charge = this.chargeMin;
-    private _moveSpeed = 100; 
+    private _fireChargeFillMultiplier: number = 20;
+    private charge: number = this.chargeMin;
+    private _jumpChargeMin: number = 350;
+    private _jumpChargeMax: number = 550;
+    private _jumpChargeFillMultiplier: number = 200;
+    private jumpCharge: number = this._jumpChargeMin;
+    private _moveSpeed = 120; 
     private moveSpd = 0;
     private moveSpd2 = 0;
-    private jumpTimer = 0;
     private airTime = 0;
     private controlMultiplier = 1;
+    private _linDamp = 0.8;
+    private linDamp = 0;
 
     constructor(private input: InputService, private mouse: MouseService, private scene: SceneService, private camera: Camera, private cannon: CannonService) {
         this.CANNON = cannon.getCannon();
@@ -51,14 +57,15 @@ export class Player {
 
     public initialize(position = {x: 0, y: 0, z: 0}) {
         let angDamp = 0.8;
-        let linDamp = 0.6;
+        let linDamp = this._linDamp;
         this.feetId = this.scene.createSphere({
             position: [position.x,position.y,position.z],
             radius: this.feetRadius,
             material: 'player',
             angularDamping: angDamp,
             linearDamping: linDamp,
-            collisionFilterGroup: 2
+            collisionFilterGroup: 2,
+            allowSleep: false
         })[0];
 
         this.midId = this.scene.createSphere({
@@ -71,7 +78,8 @@ export class Player {
             angularDamping: angDamp,
             linearDamping: linDamp,
             fixedRotation: true,
-            collisionFilterGroup: 2
+            collisionFilterGroup: 2,
+            allowSleep: false
         })[0];
 
         this.headId = this.scene.createSphere({
@@ -84,7 +92,8 @@ export class Player {
             angularDamping: angDamp,
             linearDamping: linDamp,
             fixedRotation: true,
-            collisionFilterGroup: 2
+            collisionFilterGroup: 2,
+            allowSleep: false
         })[0];
 
         this.feetBody = this.cannon.getBodyById(this.feetId);
@@ -141,28 +150,23 @@ export class Player {
     }
 
     public jump() {
-        if (this.canJump()) {
-            let deltaFeetMid = {
-                x: this.midBody.position.x - this.feetBody.position.x,
-                y: this.midBody.position.y - this.feetBody.position.y,
-                z: this.midBody.position.z - this.feetBody.position.z
+        let deltaFeetMid = {
+            x: this.midBody.position.x - this.feetBody.position.x,
+            y: this.midBody.position.y - this.feetBody.position.y,
+            z: this.midBody.position.z - this.feetBody.position.z
 
-            };
-            let deltaMidHead = {
-                x: this.headBody.position.x - this.midBody.position.x,
-                y: this.headBody.position.y - this.midBody.position.y,
-                z: this.headBody.position.z - this.midBody.position.z
-            };
-            let height = 400;
-            this.feetBody.applyImpulse(new this.CANNON.Vec3(-deltaFeetMid.x*height,-deltaFeetMid.y*height,-deltaFeetMid.z*height), this.getFeetPosition());
-            this.midBody.applyImpulse(new this.CANNON.Vec3(deltaFeetMid.x*height*.4,deltaFeetMid.y*height*.4,deltaFeetMid.z*height*.4), this.getMidPosition());
-            this.headBody.applyImpulse(new this.CANNON.Vec3(deltaMidHead.x*height,deltaMidHead.y*height,deltaMidHead.z*height), this.getHeadPosition());
-            this.jumpTimer = .4;
-        }
-    }
-
-    private canJump() {
-        return this.jumpTimer <= 0;
+        };
+        let deltaMidHead = {
+            x: this.headBody.position.x - this.midBody.position.x,
+            y: this.headBody.position.y - this.midBody.position.y,
+            z: this.headBody.position.z - this.midBody.position.z
+        };
+        let height = this.jumpCharge;
+        let bonus = .4*this.controlMultiplier;
+        this.feetBody.applyImpulse(new this.CANNON.Vec3(-deltaFeetMid.x*height,-deltaFeetMid.y*height,-deltaFeetMid.z*height), this.getFeetPosition());
+        this.midBody.applyImpulse(new this.CANNON.Vec3(deltaFeetMid.x*height*bonus,deltaFeetMid.y*height*bonus,deltaFeetMid.z*height*bonus), this.getMidPosition());
+        this.headBody.applyImpulse(new this.CANNON.Vec3(deltaMidHead.x*height,deltaMidHead.y*height,deltaMidHead.z*height), this.getHeadPosition());
+        this.jumpCharge = this._jumpChargeMin;
     }
 
     private fire() {
@@ -178,6 +182,10 @@ export class Player {
 
     public getCharge() {
         return this.charge-5;
+    }
+
+    public getJumpCharge() {
+        return (this.jumpCharge-this._jumpChargeMin)/(this._jumpChargeMax-this._jumpChargeMin)*100;
     }
 
     public getHeadPosition() {
@@ -243,11 +251,11 @@ export class Player {
     }
     public isOnGround(): boolean {
        let rayTo = Object.assign({}, this.feetBody.position);
-       rayTo.y -= this.feetRadius;
+       rayTo.y -= this.feetRadius+.1;
        let feetGrounded = this.cannon.raycastAny(this.feetBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
        
        rayTo = Object.assign({}, this.midBody.position);
-       rayTo.y -= this.midRadius;
+       rayTo.y -= this.midRadius +.1;
        let midGrounded = this.cannon.raycastAny(this.midBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
 
        return feetGrounded || midGrounded;
@@ -270,10 +278,15 @@ export class Player {
       this.controlMultiplier = (this.airTime <= 0) ? 1 : 1/(this.airTime+1) ;
       this.moveSpd = this._moveSpeed*this.controlMultiplier;
       this.moveSpd2 = (this._moveSpeed*.75)*this.controlMultiplier;
+      this.linDamp = this._linDamp * this.controlMultiplier;
+      this.feetBody.linearDamping = this.linDamp;
+      this.midBody.linearDamping = this.linDamp;
+      this.headBody.linearDamping = this.linDamp;
+
       if (this.moveSpd < 1) { this.moveSpd = 1 }
       if (this.moveSpd2 < 1) { this.moveSpd2 = 1 }
 
-      if (this.input.getKey('toggleCamera').isPressed()) {
+      if (this.mouse.getButton('right').isPressed()) {
           this.fpsCameraMode = !this.fpsCameraMode;
           if (this.fpsCameraMode == false) {
               this.camera.move(-50);
@@ -300,11 +313,17 @@ export class Player {
               this.moveRight();
           }
           if (this.input.getKey('space').isDown()) {
+              this.jumpCharge += step*this._jumpChargeFillMultiplier;
+              if (this.jumpCharge > this._jumpChargeMax) {
+                  this.jumpCharge = this._jumpChargeMax;
+              }
+          }
+          if (this.input.getKey('space').isReleased()) {
               this.jump();
           }
 
           if (this.mouse.getButton('left').isDown()) {
-              this.charge += step*10;
+              this.charge += step*this._fireChargeFillMultiplier;
               if (this.charge > this.chargeMax) {
                   this.charge = this.chargeMax;
               }
@@ -357,11 +376,8 @@ export class Player {
           //     }
           // }
       }
-
-      if (this.jumpTimer > 0) {
-          this.jumpTimer -= step;
-      } 
     }
+
     public getCamPos() {
         return this.camPos;
     };
@@ -444,7 +460,7 @@ export class GameService {
       }
       
       this.player.step(step);
-      if (this.mouse.getButton('right').isPressed() || this.player.getFeetPosition().y < -50) {
+      if (this.input.getKey('q').isPressed() || this.player.getFeetPosition().y < -50) {
           this.level[0].clear();
           this.player.destroy();
           this.scene.clear();
@@ -501,5 +517,3 @@ export class Level {
         return this.startingPosition;
     }
 }
-
-

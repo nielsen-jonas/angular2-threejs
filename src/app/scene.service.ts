@@ -56,43 +56,43 @@ export class SceneService {
         
         // Player vs concrete
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['concrete'], {
-            friction: 0.2,
+            friction: 0.1,
             restitution: 0.0
         }));
         
         // Concrete vs concrete
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['concrete'], {
-            friction: 0.02,
+            friction: 0.08,
             restitution: 0.0
         }));
 
         // Soccer ball vs soccer ball
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['soccer-ball'], {
-            friction: 0.04,
+            friction: 0.1,
             restitution: 0.4
         }));
         
         // Concrete vs soccer ball
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['soccer-ball'], {
-            friction: 0.04,
+            friction: 0.1,
             restitution: 0.4
         }));
 
         // Soccer ball vs spring
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['spring'], {
-            friction: 0.04,
+            friction: 0.1,
             restitution: 1.8 
         }));
         
         // Concrete vs spring
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['spring'], {
-            friction: 0.02,
+            friction: 0.1,
             restitution: 1.8 
         }));
 
         // Player vs spring
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
-            friction: 0.2,
+            friction: 0.1,
             restitution: 1.8 
         }));
 
@@ -148,10 +148,11 @@ export class SceneService {
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
-            allowSleep: true,
+            allowSleep: conf.allowSleep,
             fixedRotation: conf.fixedRotation,
             collisionFilterGroup: conf.collisionFilterGroup,
-            collisionFilterMask: conf.collisionFilterMask
+            collisionFilterMask: conf.collisionFilterMask,
+            sleepSpeedLimit: conf.sleepSpeedLimit
         });
 
         // Three Mesh
@@ -183,10 +184,11 @@ export class SceneService {
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
-            allowSleep: true,
+            allowSleep: conf.allowSleep,
             fixedRotation: conf.fixedRotation,
             collisionFilterGroup: conf.collisionFilterGroup,
-            collisionFilterMask: conf.collisionFilterMask
+            collisionFilterMask: conf.collisionFilterMask,
+            sleepSpeedLimit: conf.sleepSpeedLimit
         });
 
 
@@ -213,10 +215,11 @@ export class SceneService {
             velocity: new this.CANNON.Vec3(conf.velocity[0], conf.velocity[1], conf.velocity[2]),
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
-            allowSleep: true,
+            allowSleep: conf.allowSleep,
             fixedRotation: conf.fixedRotation,
             collisionFilterGroup: conf.collisionFilterGroup,
-            collisionFilterMask: conf.collisionFilterMask
+            collisionFilterMask: conf.collisionFilterMask,
+            sleepSpeedLimit: conf.sleepSpeedLimit
         });
         
         // Three Mesh
@@ -235,6 +238,8 @@ export class SceneService {
         if (typeof conf.fixedRotation == 'undefined') { conf.fixedRotation = false }
         if (typeof conf.collisionFilterGroup == 'undefined') { conf.collisionFilterGroup = 1}
         if (typeof conf.collisionFilterMask == 'undefined') { conf.collisionFilterMask = 1 | 2}
+        if (typeof conf.allowSleep == 'undefined') { conf.allowSleep = true}
+        if (typeof conf.sleepSpeedLimit == 'undefined') { conf.sleepSpeedLimit = 0.15 }
         switch (type) {
             case 'box':
                 break;
