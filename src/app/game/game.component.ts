@@ -119,7 +119,7 @@ export class GameComponent implements OnInit {
       if (!this.mouse.pointerIsLocked()) {
           this.mouse.requestPointerLock();
           if (this.resized) {
-              this.camera.reloadSkybox();
+              this.three.reloadSkybox();
               this.resized = false;
           }
       }

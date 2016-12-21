@@ -6,6 +6,7 @@ import { WindowService } from './window.service';
 export class Camera {
     private THREE;
     private camera: any;
+    private skyboxCamera: SkyboxCamera;
     private step: number;
     private _zoomMin: number = 1;
     private _zoomMax: number = 2.2;
@@ -14,7 +15,6 @@ export class Camera {
     private pitchObj: any;
     private shellObj: any;
     private camMoveSpd: number;
-    private skybox: Skybox;
 
     public constructor() {
     }
@@ -22,17 +22,15 @@ export class Camera {
     public initialize(THREE, windowAspect) {
         this.THREE = THREE;
         this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 1000);
+        this.skyboxCamera = new SkyboxCamera(new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 100));
         this.pitchObj = new this.THREE.Object3D();
         this.pitchObj.add(this.camera);
-
-        this.skybox = new Skybox(THREE);
-        this.skybox.load();
     }
 
     public setStep(step) {
         this.step = step;
         this.camMoveSpd = step * 4;
-        this.skybox.updatePosition(this.pitchObj.position.x, this.pitchObj.position.y, this.pitchObj.position.z);
+        this.skyboxCamera.setCameraQuaternion(this.getCameraQuaternion());
     }
 
     public setCameraPosition(x: number, y: number, z: number) {
@@ -72,14 +70,10 @@ export class Camera {
     public move(amount) {
         this.pitchObj.translateZ(-amount*this.camMoveSpd);
         this.pitchObj.translateY(amount*this.camera.rotation.x*this.camMoveSpd);
-          let pos = this.pitchObj.position;
-          this.skybox.updatePosition(pos.x, pos.y, pos.z);
     }
 
     public strafe(amount) {
         this.pitchObj.translateX(amount*this.camMoveSpd);
-          let pos = this.pitchObj.position;
-          this.skybox.updatePosition(pos.x, pos.y, pos.z);
     }
 
     public getCamera() {
@@ -90,6 +84,10 @@ export class Camera {
         return this.pitchObj;
     }
 
+    public getSkyboxCamera() {
+        return this.skyboxCamera.getCamera();
+    }
+
     public getCameraPosition() {
         return this.camera.getWorldPosition();
     }
@@ -98,20 +96,17 @@ export class Camera {
         return this.camera.getWorldDirection();
     }
 
+    public getCameraQuaternion() {
+        return this.camera.getWorldQuaternion();
+    }
+
     public getPitchObjDirection() {
         return this.pitchObj.getWorldDirection();
     }
 
-    public getSkybox() {
-        return this.skybox.getSkybox();
-    }
-
     public updateWindowSize() {
         this.camera.updateProjectionMatrix();
-    }
-
-    public reloadSkybox() {
-        this.skybox.loadMaterial();
+        this.skyboxCamera.updateProjectionMatrix();
     }
 
     public zoomIn() {
@@ -122,6 +117,7 @@ export class Camera {
             }
             this.camera.zoom = this.zoom;
             this.camera.updateProjectionMatrix();
+            this.skyboxCamera.setZoom(this.camera.zoom);
         }
     }
 
@@ -129,6 +125,7 @@ export class Camera {
         this.zoom = this._zoomMin;
         this.camera.zoom = this.zoom;
         this.camera.updateProjectionMatrix();
+        this.skyboxCamera.setZoom(this.camera.zoom);
     } 
 
 }
@@ -139,11 +136,15 @@ export class ThreeService {
     private THREE: any = require('three');
 
     private scene: any;
+    private skybox: Skybox;
+    private skyboxScene: any;
     private renderer: any;
 
     private running: boolean = false;
 
     private meshes: any[] = [];
+
+    //private lensFlare: LensFlare;
 
   constructor(private window: WindowService, private cam: Camera) {
       this.init();
@@ -151,15 +152,19 @@ export class ThreeService {
 
   private init() {
         this.scene = new this.THREE.Scene();
-        this.renderer = new this.THREE.WebGLRenderer({ alpha: false, antialias: true });
-        this.renderer.autoclear = true;
+        this.skyboxScene = new this.THREE.Scene();
+        this.skybox = new Skybox(this.THREE);
+        this.skybox.load();
+        this.renderer = new this.THREE.WebGLRenderer({ alpha: true, antialias: true });
+        this.renderer.autoClear = false;
         let ambientLight = new this.THREE.AmbientLight( 0x707070 );
         this.scene.add( ambientLight );
         let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
         directionalLight.position.set(1000,286,-162);
         this.scene.add( directionalLight );
-        this.run();
-  
+        //this.lensFlare = new LensFlare(this.THREE);
+        //this.lensFlare.setPosition(directionalLight.position);
+        //this.scene.add(this.lensFlare.getLensFlare());
   }
 
     public getThree() {
@@ -180,7 +185,7 @@ export class ThreeService {
     
     public initialize() {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
-        this.scene.add(this.cam.getSkybox());
+        this.skyboxScene.add(this.skybox.getSkybox());
         this.scene.add(this.cam.getCam());
     }
 
@@ -213,6 +218,8 @@ export class ThreeService {
 
     public render() {
         if (this.running) {
+            this.renderer.clear();
+            this.renderer.render(this.skyboxScene, this.cam.getSkyboxCamera());
             this.renderer.render(this.scene, this.cam.getCamera());
         }
     }
@@ -225,11 +232,16 @@ export class ThreeService {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
     }
 
+    public reloadSkybox() {
+        this.skybox.reload();
+    }
+
 }
 
 export class Skybox {
     private THREE;
     private skybox: any;
+
     private cubeTextureLoader: any;
     
     private urlPrefix = "./assets/cubemap/ice_river/";
@@ -246,7 +258,7 @@ export class Skybox {
     private material: any;
 
     public constructor(THREE) {
-        this.THREE = THREE 
+        this.THREE = THREE;
         this.cubeTextureLoader = new this.THREE.CubeTextureLoader();
     }
 
@@ -254,15 +266,9 @@ export class Skybox {
         return this.skybox;
     }
 
-    public updatePosition(x = null, y = null, z = null) {
-        if (x) {this.skybox.position.x = x;}
-        if (y) {this.skybox.position.y = y;}
-        if (z) {this.skybox.position.z = z;}
-    }
-
     public load() {
         this.loadMaterial();
-        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(1000, 1000, 1000), this.material);
+        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(100, 100, 100), this.material);
     }
 
     public loadMaterial() {
@@ -277,4 +283,62 @@ export class Skybox {
             side: this.THREE.BackSide
         });
     }
+
+    public reload() {
+        this.loadMaterial();
+    }
+
 }
+
+export class SkyboxCamera {
+    private camera: any;
+
+    public constructor(camera) {
+        this.camera = camera;
+    }
+
+    public getCamera() {
+        return this.camera;
+    }
+
+    public setCameraQuaternion(q) {
+        this.camera.setRotationFromQuaternion(q);
+    }
+
+    public setZoom(zoom: number) {
+        this.camera.zoom = zoom;
+        this.camera.updateProjectionMatrix();
+    }
+
+    public updateProjectionMatrix() {
+        this.camera.updateProjectionMatrix();
+    }
+    
+}
+
+// export class LensFlare {
+//     private THREE;
+//     private scene;
+//     private textureLoader; 
+//     private textureFlare;
+//     private flareColor;
+//     private lensFlare;
+// 
+//     public constructor(THREE) {
+//         this.THREE = THREE
+//         this.textureLoader = new this.THREE.TextureLoader();
+//         this.textureFlare = this.textureLoader.load('./assets/lensflares/star_glow.png');
+//         this.flareColor = new this.THREE.Color( 0xffffff );
+//         //this.flareColor.setHSL();
+//         this.lensFlare = new this.THREE.LensFlare( this.textureFlare, 700, 0.0, this.THREE.AdditiveBlending, this.flareColor );
+//     }
+// 
+//     public setPosition(position) {
+//         this.lensFlare.position.copy(position);
+//     }
+// 
+//     public getLensFlare() {
+//         return this.lensFlare;
+//     }
+// 
+// }
