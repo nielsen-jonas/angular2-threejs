@@ -72,6 +72,10 @@ export class CannonService {
       this.world.addConstraint(constraint);
   }
 
+  public raycastAny(from, to, options = {}) {
+      return this.world.raycastAny(from, to, options);
+  }
+
   public step(fixedTimeStep: number, timeSinceLastCalled: number) {
       if (this.running) {
           this.world.step(fixedTimeStep, timeSinceLastCalled);

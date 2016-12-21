@@ -83,6 +83,18 @@ export class SceneService {
             friction: 0.04,
             restitution: 1.8 
         }));
+        
+        // Concrete vs spring
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['spring'], {
+            friction: 0.02,
+            restitution: 1.8 
+        }));
+
+        // Frictionless vs spring
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['frictionless'], this.cannonMaterials['spring'], {
+            friction: 0.0,
+            restitution: 1.8 
+        }));
 
         // Tune contacts
         for (let i = 0, len = this.cannonContactMaterials.length; i < len; i++) {
@@ -130,7 +142,9 @@ export class SceneService {
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
             allowSleep: true,
-            fixedRotation: conf.fixedRotation
+            fixedRotation: conf.fixedRotation,
+            collisionFilterGroup: conf.collisionFilterGroup,
+            collisionFilterMask: conf.collisionFilterMask
         });
 
         // Three Mesh
@@ -163,7 +177,9 @@ export class SceneService {
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
             allowSleep: true,
-            fixedRotation: conf.fixedRotation
+            fixedRotation: conf.fixedRotation,
+            collisionFilterGroup: conf.collisionFilterGroup,
+            collisionFilterMask: conf.collisionFilterMask
         });
 
 
@@ -191,7 +207,9 @@ export class SceneService {
             linearDamping: conf.linearDamping,
             angularDamping: conf.angularDamping,
             allowSleep: true,
-            fixedRotation: conf.fixedRotation
+            fixedRotation: conf.fixedRotation,
+            collisionFilterGroup: conf.collisionFilterGroup,
+            collisionFilterMask: conf.collisionFilterMask
         });
         
         // Three Mesh
@@ -202,30 +220,32 @@ export class SceneService {
     };
 
     private filterConfiguration(conf, type: string) {
-        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] };
-        if (typeof conf.rotation == 'undefined') { conf.rotation = [0,0,0] };
-        if (typeof conf.material == 'undefined') { conf.material = 'concrete' };
-        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] };
-        if (typeof conf.static == 'undefined') { conf.static = false };
-        if (typeof conf.fixedRotation == 'undefined') { conf.fixedRotation = false };
+        if (typeof conf.position == 'undefined') { conf.position = [0,0,0] }
+        if (typeof conf.rotation == 'undefined') { conf.rotation = [0,0,0] }
+        if (typeof conf.material == 'undefined') { conf.material = 'concrete' }
+        if (typeof conf.velocity == 'undefined') { conf.velocity = [0,0,0] }
+        if (typeof conf.static == 'undefined') { conf.static = false }
+        if (typeof conf.fixedRotation == 'undefined') { conf.fixedRotation = false }
+        if (typeof conf.collisionFilterGroup == 'undefined') { conf.collisionFilterGroup = 1}
+        if (typeof conf.collisionFilterMask == 'undefined') { conf.collisionFilterMask = 1 | 2}
         switch (type) {
             case 'box':
                 break;
             case 'cylinder':
-                if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-                if (typeof conf.radiusTop == 'undefined') { conf.radiusTop = conf.radius };
-                if (typeof conf.radiusBottom == 'undefined') { conf.radiusBottom = conf.radius };
-                if (typeof conf.height == 'undefined') { conf.height = 1 };
-                if (typeof conf.radiusSegments == 'undefined') { conf.radiusSegments = 16 };
+                if (typeof conf.radius == 'undefined') { conf.radius = 1 }
+                if (typeof conf.radiusTop == 'undefined') { conf.radiusTop = conf.radius }
+                if (typeof conf.radiusBottom == 'undefined') { conf.radiusBottom = conf.radius }
+                if (typeof conf.height == 'undefined') { conf.height = 1 }
+                if (typeof conf.radiusSegments == 'undefined') { conf.radiusSegments = 16 }
                 break;
             case 'sphere':
-                if (typeof conf.radius == 'undefined') { conf.radius = 1 };
-                if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.2 };
-                if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.2 };
+                if (typeof conf.radius == 'undefined') { conf.radius = 1 }
+                if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.2 }
+                if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.2 }
                 break
         }
-        if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.0 };
-        if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.0 };
+        if (typeof conf.linearDamping == 'undefined') { conf.linearDamping = 0.0 }
+        if (typeof conf.angularDamping == 'undefined') { conf.angularDamping = 0.0 }
         return conf;
     }
 

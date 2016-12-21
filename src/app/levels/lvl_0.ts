@@ -51,6 +51,14 @@ export let lvl0 = function() {
             material: 'concrete' 
         }));
 
+        // spring
+        this.objects.push(this.scene.createBox({
+            position: [x-7, -1.5,6],
+            dimensions: [1, .2, 1],
+            static: true,
+            material: 'spring'
+        }));
+
         for (let z = -2; z < 3; z += 1) {
             // pillars
             this.objects.push(this.scene.createBox({

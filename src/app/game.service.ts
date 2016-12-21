@@ -40,6 +40,8 @@ export class Player {
     private moveSpd = 150;
     private moveSpd2 = 75;
     private jumpTimer = 0;
+    private airTime = 0;
+    private controlMultiplier = 1;
 
     constructor(private input: InputService, private mouse: MouseService, private scene: SceneService, private camera: Camera, private cannon: CannonService) {
         this.CANNON = cannon.getCannon();
@@ -50,7 +52,8 @@ export class Player {
             position: [position.x,position.y,position.z],
             fixedRotation: true,
             radius: this.feetRadius,
-            material: 'player'
+            material: 'player',
+            collisionFilterGroup: 2
         })[0];
 
         this.midId = this.scene.createSphere({
@@ -60,7 +63,8 @@ export class Player {
                 position.z],
             fixedRotation: true,
             radius: this.midRadius,
-            material: 'player'
+            material: 'player',
+            collisionFilterGroup: 2
         })[0];
 
         this.headId = this.scene.createSphere({
@@ -70,7 +74,8 @@ export class Player {
                 position.z],
             fixedRotation: true,
             radius: this.headRadius,
-            material: 'player'
+            material: 'player',
+            collisionFilterGroup: 2
         })[0];
 
         this.feetBody = this.cannon.getBodyById(this.feetId);
@@ -127,15 +132,19 @@ export class Player {
     }
 
     public jump() {
-        if (!this.isFalling() && this.jumpTimer <= 0) {
+        if (this.canJump()) {
             let direction = this.camera.getPitchObjDirection();
             let mult = 5;
             let height = 60;
             this.feetBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getFeetPosition());
             this.midBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getMidPosition());
             this.headBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getHeadPosition());
-            this.jumpTimer = .8;
+            this.jumpTimer = .2;
         }
+    }
+
+    private canJump() {
+        return this.isOnGround() && this.jumpTimer <= 0;
     }
 
     private fire() {
@@ -166,7 +175,7 @@ export class Player {
     }
 
     public moveForward() {
-        if (this.isInitialized && this.isNotFallingVeryMuch()) {
+        if (this.isInitialized && this.isOnGround()) {
             let direction = this.camera.getPitchObjDirection();
             this.feetBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd,0,-direction.z*this.moveSpd), this.getFeetPosition());
             this.midBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd*.5,0,-direction.z*this.moveSpd), this.getFeetPosition());
@@ -175,7 +184,7 @@ export class Player {
     }
 
     public moveBack() {
-        if (this.isInitialized && this.isNotFallingVeryMuch()) {
+        if (this.isInitialized && this.isOnGround()) {
             let direction = this.camera.getPitchObjDirection();
             this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
             this.midBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2*.5,0,direction.z*this.moveSpd2), this.getFeetPosition());
@@ -184,7 +193,7 @@ export class Player {
     }
 
     public moveLeft() {
-        if (this.isInitialized && this.isNotFallingVeryMuch()) {
+        if (this.isInitialized && this.isOnGround()) {
             let direction = this.camera.getPitchObjDirection();
             let x = direction.x;
             let z = direction.z;
@@ -198,7 +207,7 @@ export class Player {
     }
 
     public moveRight() {
-        if (this.isInitialized && this.isNotFallingVeryMuch()) {
+        if (this.isInitialized && this.isOnGround()) {
             let direction = this.camera.getPitchObjDirection();
             let x = direction.x;
             let z = direction.z;
@@ -210,15 +219,10 @@ export class Player {
             this.headBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
         }
     }
-
-    public isFalling(): boolean {
-        let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
-        return (Math.abs(feetVelocity) > 1);
-    }
-
-    public isNotFallingVeryMuch(): boolean {
-        let feetVelocity = this.feetBody.getVelocityAtWorldPoint(new this.CANNON.Vec3(0,0,0), new this.CANNON.Vec3(0,0,0)).y;
-        return (Math.abs(feetVelocity) < 2.5);
+    public isOnGround(): boolean {
+       let rayTo = Object.assign({}, this.feetBody.position);
+       rayTo.y -= this.feetRadius;
+       return this.cannon.raycastAny(this.feetBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
     }
 
     public getHeadQuaternion() {
@@ -226,6 +230,13 @@ export class Player {
     }
 
     public step(step) {
+      if (this.isOnGround()) {
+          this.airTime = 0;
+      } else {
+          this.airTime += step;
+      }
+      this.controlMultiplier = (this.airTime <= 0) ? 1 : 1/(this.airTime+1) ;
+
       if (this.input.getKey('toggleCamera').isPressed()) {
           this.fpsCameraMode = !this.fpsCameraMode;
           if (this.fpsCameraMode == false) {
@@ -286,12 +297,13 @@ export class Player {
       //this.camera.setCameraPosition(headPosition.x,headPosition.y,headPosition.z);
       //this.camera.setShellQuaternion(headQuaternion.x, headQuaternion.y, headQuaternion.z, headQuaternion.w);
       if (this.isInitialized) {
-          if (this.isNotFallingVeryMuch() || this.jumpTimer > 0) {
-              this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -400, 0), this.feetBody.position);
-              this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 300, 0), this.midBody.position);
-              this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100, 0), this.headBody.position);
+          //if (this.isOnGround()) {
+          if (this.controlMultiplier > .4) {
+              this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -400*this.controlMultiplier, 0), this.feetBody.position);
+              this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 300*this.controlMultiplier, 0), this.midBody.position);
+              this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100*this.controlMultiplier, 0), this.headBody.position);
           }
-          if (this.isNotFallingVeryMuch()) {
+          if (this.isOnGround()) {
               if (this.feetBody.linearDamping != 0.9) {
                   this.feetBody.linearDamping = 0.9;
                   this.midBody.linearDamping = 0.9;
