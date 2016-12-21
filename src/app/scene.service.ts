@@ -239,7 +239,7 @@ export class SceneService {
         if (typeof conf.collisionFilterGroup == 'undefined') { conf.collisionFilterGroup = 1}
         if (typeof conf.collisionFilterMask == 'undefined') { conf.collisionFilterMask = 1 | 2}
         if (typeof conf.allowSleep == 'undefined') { conf.allowSleep = true}
-        if (typeof conf.sleepSpeedLimit == 'undefined') { conf.sleepSpeedLimit = 0.15 }
+        if (typeof conf.sleepSpeedLimit == 'undefined') { conf.sleepSpeedLimit = 0.2 }
         switch (type) {
             case 'box':
                 break;

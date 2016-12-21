@@ -1,16 +1,13 @@
-export function getRandomInt(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
-
-export let lvl0 = function() {
+export let lvl0Init = function() {
+    this.memory['meteorite-clock'] = 0;
     this.startingPosition = {
         x: 0,
-        y: 15,
+        y: 18,
         z: 0 
     };
 
     // Cylinder
-    this.objects.push(this.scene.createCylinder({
+    this.assoc['cylinder'] = this.scene.createCylinder({
         position: [35,47,0],
         rotation: [1,0,0],
         velocity: [-10,0,0],
@@ -20,7 +17,7 @@ export let lvl0 = function() {
         radiusSegments: 32,
         angularDamping: 0.0,
         linearDamping: 0.0
-    }));
+    });
     
     // Plank
     this.objects.push(this.scene.createBox({
@@ -31,7 +28,7 @@ export let lvl0 = function() {
         material: 'concrete'
     }));
 
-    for (let x = -36; x < 2; x += 12){
+    for (let x = -48, i = 0; x < 2; x += 12, i++){
         // floors
         this.objects.push(this.scene.createBox({
             position: [x-.5,-1,0],
@@ -40,18 +37,18 @@ export let lvl0 = function() {
             material: 'concrete' 
         }));
 
-        for (let z = -2; z < 3; z += 1) {
+        for (let z = -2; z < 3; z += 2) {
             // pillars
             this.objects.push(this.scene.createBox({
-                position: [x,7,z],
-                dimensions: [.3,6,.45],
+                position: [x,7.5,z],
+                dimensions: [.3,7,.2+i*.1],
                 material: 'concrete' 
             }));
         }
     }
 
     // floors
-    for (let x = -60; x < -40; x += 10){
+    for (let x = -72; x < -52; x += 10){
         this.objects.push(this.scene.createBox({
             position: [x,1,0],
             dimensions: [5,.3,5],
@@ -59,4 +56,23 @@ export let lvl0 = function() {
             material: 'concrete' 
         }));
     }
+}
+
+export let lvl0Loop = function (step) {
+    if (this.memory['meteorite-clock'] <= 0) {
+        this.memory['meteorite-clock'] = .1*getRandomInt(1,10);
+        console.log('METEOR TIME');
+        let x = getRandomInt(20,100);
+        let z = getRandomInt(-20,20);
+        this.objects.push(this.scene.createSphere({
+            position: [x,200,z],
+            radius: getRandomInt(1,2),
+            velocity: [-20, 0, 0],
+            material: 'concrete'
+        }));
+    } else { this.memory['meteorite-clock'] -= step }
+}
+
+function getRandomInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min)) + min;
 }

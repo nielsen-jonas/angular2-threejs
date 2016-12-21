@@ -4,7 +4,7 @@ import { ThreeService, Camera } from './three.service';
 import { SceneService } from './scene.service';
 import { InputService } from './input.service';
 import { MouseService } from './mouse.service';
-import { lvl0 } from './levels/lvl_0';
+import { lvl0Init, lvl0Loop } from './levels/lvl_0';
 
 @Injectable()
 export class Player {
@@ -406,7 +406,7 @@ export class GameService {
       private input: InputService,
       private mouse: MouseService,
       private player: Player) {
-          this.level.push(new Level(this.scene, lvl0));
+          this.level.push(new Level(this.scene, lvl0Init, lvl0Loop));
       }
 
       private level: Level[] = [];
@@ -467,6 +467,7 @@ export class GameService {
           this.level[0].initialize();
           this.player.initialize(this.level[0].getStartingPosition());
       }
+      this.level[0].step(step);
   }
 
 }
@@ -475,21 +476,25 @@ export class Level {
     private scene;
     private initialized: boolean = false;
     private completed: boolean = false;
-    private blueprint: Function; 
+    private init; 
+    private loop; 
     private objects: any[] = [];
+    private assoc: any[] = [];
+    private memory: any[] = [];
     private startingPosition = {
         x: 0,
         y: 0,
         z: 0 
     };
 
-    constructor(scene, blueprint: Function) {
+    constructor(scene, init, loop) {
         this.scene = scene;
-        this.blueprint = blueprint;
+        this.init = init;
+        this.loop = loop;
     }
 
     public initialize() {
-        this.blueprint();
+        this.init();
         this.initialized = true;
     } 
 
@@ -501,16 +506,27 @@ export class Level {
         return this.completed;
     }
 
+    public step(step) {
+        this.loop(step);
+    }
+
     public clear() {
         for (let i = 0, len = this.objects.length; i < len; i++) {
             this.scene.removeObjectByBodyId(this.objects[i][0]);
         }
+        for (let key in this.assoc) {
+            this.scene.removeObjectByBodyId(this.assoc[key][0]);
+        }
+
         this.objects = [];
+        this.assoc = [];
+        this.memory = [];
+        this.initialized = false;
     }
 
     public restart() {
         this.clear();
-        this.blueprint();
+        this.init();
         this.initialized = true;
     }
     public getStartingPosition() {
