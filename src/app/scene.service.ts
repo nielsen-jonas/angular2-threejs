@@ -31,7 +31,7 @@ export class SceneService {
         this.cannonMaterials['concrete'] = new this.CANNON.Material();
         this.cannonMaterials['soccer-ball'] = new this.CANNON.Material();
         this.cannonMaterials['spring'] = new this.CANNON.Material();
-        this.cannonMaterials['frictionless'] = new this.CANNON.Material();
+        this.cannonMaterials['player'] = new this.CANNON.Material();
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
@@ -51,12 +51,12 @@ export class SceneService {
         this.materials['spring'].setThreeMaterial('orange');
         this.materials['player'] = new Material;
         this.materials['player'].setDensity(9.85);
-        this.materials['player'].setCannonMaterial('frictionless');
-        this.materials['player'].setThreeMaterial('blue');
+        this.materials['player'].setCannonMaterial('player');
+        this.materials['player'].setThreeMaterial('sign-arrow');
         
-        // Frictionless vs concrete
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['frictionless'], this.cannonMaterials['concrete'], {
-            friction: 0.0,
+        // Player vs concrete
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['concrete'], {
+            friction: 0.2,
             restitution: 0.0
         }));
         
@@ -90,11 +90,18 @@ export class SceneService {
             restitution: 1.8 
         }));
 
-        // Frictionless vs spring
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['frictionless'], this.cannonMaterials['spring'], {
-            friction: 0.0,
+        // Player vs spring
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
+            friction: 0.2,
             restitution: 1.8 
         }));
+
+        // Player vs player 
+        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
+            friction: 0.0,
+            restitution: 0.0
+        }));
+
 
         // Tune contacts
         for (let i = 0, len = this.cannonContactMaterials.length; i < len; i++) {

@@ -31,14 +31,16 @@ export class Player {
     private headRadius: number = .2;
     private midRadius: number = .25;
     private feetRadius: number = .3;
-    private partsDistance: number = .02;
+    //private partsDistance: number = .02;
+    private partsDistance: number = .05;
     
     private strength: number;
     private chargeMin: number = 5;
     private chargeMax: number = 20;
     private charge = this.chargeMin;
-    private moveSpd = 150;
-    private moveSpd2 = 75;
+    private _moveSpeed = 100; 
+    private moveSpd = 0;
+    private moveSpd2 = 0;
     private jumpTimer = 0;
     private airTime = 0;
     private controlMultiplier = 1;
@@ -48,11 +50,14 @@ export class Player {
     }
 
     public initialize(position = {x: 0, y: 0, z: 0}) {
+        let angDamp = 0.8;
+        let linDamp = 0.6;
         this.feetId = this.scene.createSphere({
             position: [position.x,position.y,position.z],
-            fixedRotation: true,
             radius: this.feetRadius,
             material: 'player',
+            angularDamping: angDamp,
+            linearDamping: linDamp,
             collisionFilterGroup: 2
         })[0];
 
@@ -61,9 +66,11 @@ export class Player {
                 position.x,
                 position.y+this.feetRadius+this.midRadius+this.partsDistance,
                 position.z],
-            fixedRotation: true,
             radius: this.midRadius,
             material: 'player',
+            angularDamping: angDamp,
+            linearDamping: linDamp,
+            fixedRotation: true,
             collisionFilterGroup: 2
         })[0];
 
@@ -72,9 +79,11 @@ export class Player {
                 position.x,
                 position.y+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
                 position.z],
-            fixedRotation: true,
             radius: this.headRadius,
             material: 'player',
+            angularDamping: angDamp,
+            linearDamping: linDamp,
+            fixedRotation: true,
             collisionFilterGroup: 2
         })[0];
 
@@ -84,13 +93,13 @@ export class Player {
 
         this.cannon.distanceConstraintById(this.feetId, this.midId,
             this.feetRadius+this.midRadius+this.partsDistance,
-            20);
+            80);
         this.cannon.distanceConstraintById(this.midId, this.headId,
             this.midRadius+this.headRadius+this.partsDistance,
-            20);
+            80);
         this.cannon.distanceConstraintById(this.feetId, this.headId,
-            this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
-            20);
+        this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
+            10);
 
         // this.cannon.coneTwistConstraintById(this.feetId, this.midId, {
         //     maxForce: 10,
@@ -133,18 +142,27 @@ export class Player {
 
     public jump() {
         if (this.canJump()) {
-            let direction = this.camera.getPitchObjDirection();
-            let mult = 5;
-            let height = 60;
-            this.feetBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getFeetPosition());
-            this.midBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getMidPosition());
-            this.headBody.applyImpulse(new this.CANNON.Vec3(-direction.x*mult, height, -direction.z*mult), this.getHeadPosition());
-            this.jumpTimer = .2;
+            let deltaFeetMid = {
+                x: this.midBody.position.x - this.feetBody.position.x,
+                y: this.midBody.position.y - this.feetBody.position.y,
+                z: this.midBody.position.z - this.feetBody.position.z
+
+            };
+            let deltaMidHead = {
+                x: this.headBody.position.x - this.midBody.position.x,
+                y: this.headBody.position.y - this.midBody.position.y,
+                z: this.headBody.position.z - this.midBody.position.z
+            };
+            let height = 400;
+            this.feetBody.applyImpulse(new this.CANNON.Vec3(-deltaFeetMid.x*height,-deltaFeetMid.y*height,-deltaFeetMid.z*height), this.getFeetPosition());
+            this.midBody.applyImpulse(new this.CANNON.Vec3(deltaFeetMid.x*height*.4,deltaFeetMid.y*height*.4,deltaFeetMid.z*height*.4), this.getMidPosition());
+            this.headBody.applyImpulse(new this.CANNON.Vec3(deltaMidHead.x*height,deltaMidHead.y*height,deltaMidHead.z*height), this.getHeadPosition());
+            this.jumpTimer = .4;
         }
     }
 
     private canJump() {
-        return this.isOnGround() && this.jumpTimer <= 0;
+        return this.jumpTimer <= 0;
     }
 
     private fire() {
@@ -175,7 +193,8 @@ export class Player {
     }
 
     public moveForward() {
-        if (this.isInitialized && this.isOnGround()) {
+        //if (this.isInitialized && this.isOnGround()) {
+        if (this.isInitialized) {
             let direction = this.camera.getPitchObjDirection();
             this.feetBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd,0,-direction.z*this.moveSpd), this.getFeetPosition());
             this.midBody.applyForce(new this.CANNON.Vec3(-direction.x*this.moveSpd*.5,0,-direction.z*this.moveSpd), this.getFeetPosition());
@@ -184,7 +203,8 @@ export class Player {
     }
 
     public moveBack() {
-        if (this.isInitialized && this.isOnGround()) {
+        // if (this.isInitialized && this.isOnGround()) {
+        if (this.isInitialized) {
             let direction = this.camera.getPitchObjDirection();
             this.feetBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2,0,direction.z*this.moveSpd2), this.getFeetPosition());
             this.midBody.applyForce(new this.CANNON.Vec3(direction.x*this.moveSpd2*.5,0,direction.z*this.moveSpd2), this.getFeetPosition());
@@ -193,7 +213,8 @@ export class Player {
     }
 
     public moveLeft() {
-        if (this.isInitialized && this.isOnGround()) {
+        // if (this.isInitialized && this.isOnGround()) {
+        if (this.isInitialized) {
             let direction = this.camera.getPitchObjDirection();
             let x = direction.x;
             let z = direction.z;
@@ -207,7 +228,8 @@ export class Player {
     }
 
     public moveRight() {
-        if (this.isInitialized && this.isOnGround()) {
+        // if (this.isInitialized && this.isOnGround()) {
+        if (this.isInitialized) {
             let direction = this.camera.getPitchObjDirection();
             let x = direction.x;
             let z = direction.z;
@@ -222,7 +244,17 @@ export class Player {
     public isOnGround(): boolean {
        let rayTo = Object.assign({}, this.feetBody.position);
        rayTo.y -= this.feetRadius;
-       return this.cannon.raycastAny(this.feetBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
+       let feetGrounded = this.cannon.raycastAny(this.feetBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
+       
+       rayTo = Object.assign({}, this.midBody.position);
+       rayTo.y -= this.midRadius;
+       let midGrounded = this.cannon.raycastAny(this.midBody.position, rayTo, {collisionFilterMask: 1, collisionFilterGroup: 1});
+
+       return feetGrounded || midGrounded;
+    }
+
+    public isFalling() {
+        return this.feetBody.velocity.y < -.5
     }
 
     public getHeadQuaternion() {
@@ -236,6 +268,10 @@ export class Player {
           this.airTime += step;
       }
       this.controlMultiplier = (this.airTime <= 0) ? 1 : 1/(this.airTime+1) ;
+      this.moveSpd = this._moveSpeed*this.controlMultiplier;
+      this.moveSpd2 = (this._moveSpeed*.75)*this.controlMultiplier;
+      if (this.moveSpd < 1) { this.moveSpd = 1 }
+      if (this.moveSpd2 < 1) { this.moveSpd2 = 1 }
 
       if (this.input.getKey('toggleCamera').isPressed()) {
           this.fpsCameraMode = !this.fpsCameraMode;
@@ -299,23 +335,27 @@ export class Player {
       if (this.isInitialized) {
           //if (this.isOnGround()) {
           if (this.controlMultiplier > .4) {
-              this.feetBody.applyLocalForce(new this.CANNON.Vec3(0, -400*this.controlMultiplier, 0), this.feetBody.position);
-              this.midBody.applyLocalForce(new this.CANNON.Vec3(0, 300*this.controlMultiplier, 0), this.midBody.position);
-              this.headBody.applyLocalForce(new this.CANNON.Vec3(0, 100*this.controlMultiplier, 0), this.headBody.position);
+              this.feetBody.applyForce(new this.CANNON.Vec3(0, -800*this.controlMultiplier, 0), this.feetBody.position);
+              this.midBody.applyForce(new this.CANNON.Vec3(0, 600*this.controlMultiplier, 0), this.midBody.position);
+              this.headBody.applyForce(new this.CANNON.Vec3(0, 200*this.controlMultiplier, 0), this.headBody.position);
+          } else if (!this.isFalling()) {
+              this.feetBody.applyForce(new this.CANNON.Vec3(0, -800, 0), this.feetBody.position);
+              this.midBody.applyForce(new this.CANNON.Vec3(0, 600, 0), this.midBody.position);
+              this.headBody.applyForce(new this.CANNON.Vec3(0, 200, 0), this.headBody.position);
           }
-          if (this.isOnGround()) {
-              if (this.feetBody.linearDamping != 0.9) {
-                  this.feetBody.linearDamping = 0.9;
-                  this.midBody.linearDamping = 0.9;
-                  this.headBody.linearDamping = 0.9;
-              }
-          } else {
-              if (this.feetBody.linearDamping != 0.01) {
-                  this.feetBody.linearDamping = 0.01;
-                  this.midBody.linearDamping = 0.01;
-                  this.headBody.linearDamping = 0.01;
-              }
-          }
+          // if (this.isOnGround()) {
+          //     if (this.feetBody.linearDamping != 0.9) {
+          //         this.feetBody.linearDamping = 0.9;
+          //         this.midBody.linearDamping = 0.9;
+          //         this.headBody.linearDamping = 0.9;
+          //     }
+          // } else {
+          //     if (this.feetBody.linearDamping != 0.01) {
+          //         this.feetBody.linearDamping = 0.01;
+          //         this.midBody.linearDamping = 0.01;
+          //         this.headBody.linearDamping = 0.01;
+          //     }
+          // }
       }
 
       if (this.jumpTimer > 0) {
