@@ -6,7 +6,6 @@ import { WindowService } from './window.service';
 export class Camera {
     private THREE;
     private camera: any;
-    private skyboxCamera: SkyboxCamera;
     private step: number;
     private _zoomMin: number = 1;
     private _zoomMax: number = 2.2;
@@ -21,8 +20,7 @@ export class Camera {
 
     public initialize(THREE, windowAspect) {
         this.THREE = THREE;
-        this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 1000);
-        this.skyboxCamera = new SkyboxCamera(new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 100));
+        this.camera = new this.THREE.PerspectiveCamera( 45, windowAspect, .1, 600);
         this.pitchObj = new this.THREE.Object3D();
         this.pitchObj.add(this.camera);
     }
@@ -30,7 +28,6 @@ export class Camera {
     public setStep(step) {
         this.step = step;
         this.camMoveSpd = step * 4;
-        this.skyboxCamera.setCameraQuaternion(this.getCameraQuaternion());
     }
 
     public setCameraPosition(x: number, y: number, z: number) {
@@ -84,10 +81,6 @@ export class Camera {
         return this.pitchObj;
     }
 
-    public getSkyboxCamera() {
-        return this.skyboxCamera.getCamera();
-    }
-
     public getCameraPosition() {
         return this.camera.getWorldPosition();
     }
@@ -106,7 +99,6 @@ export class Camera {
 
     public updateWindowSize() {
         this.camera.updateProjectionMatrix();
-        this.skyboxCamera.updateProjectionMatrix();
     }
 
     public zoomIn() {
@@ -117,7 +109,6 @@ export class Camera {
             }
             this.camera.zoom = this.zoom;
             this.camera.updateProjectionMatrix();
-            this.skyboxCamera.setZoom(this.camera.zoom);
         }
     }
 
@@ -125,7 +116,6 @@ export class Camera {
         this.zoom = this._zoomMin;
         this.camera.zoom = this.zoom;
         this.camera.updateProjectionMatrix();
-        this.skyboxCamera.setZoom(this.camera.zoom);
     } 
 
 }
@@ -137,7 +127,6 @@ export class ThreeService {
 
     private scene: any;
     private skybox: Skybox;
-    private skyboxScene: any;
     private renderer: any;
 
     private running: boolean = false;
@@ -153,11 +142,9 @@ export class ThreeService {
 
   private init() {
         this.scene = new this.THREE.Scene();
-        this.skyboxScene = new this.THREE.Scene();
         this.skybox = new Skybox(this.THREE);
         this.skybox.load();
         this.renderer = new this.THREE.WebGLRenderer({ alpha: true, antialias: true });
-        this.renderer.autoClear = false;
         let ambientLight = new this.THREE.AmbientLight( 0x707070 );
         this.scene.add( ambientLight );
         let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
@@ -186,7 +173,7 @@ export class ThreeService {
     
     public initialize() {
         this.renderer.setSize(this.window.getWidth(), this.window.getHeight());
-        this.skyboxScene.add(this.skybox.getSkybox());
+        this.scene.add(this.skybox.getSkybox());
         this.scene.add(this.cam.getCam());
     }
 
@@ -219,8 +206,7 @@ export class ThreeService {
 
     public render() {
         if (this.running) {
-            this.renderer.clear();
-            this.renderer.render(this.skyboxScene, this.cam.getSkyboxCamera());
+            this.skybox.setPosition(this.cam.getCameraPosition());
             this.renderer.render(this.scene, this.cam.getCamera());
         }
     }
@@ -271,9 +257,15 @@ export class Skybox {
         return this.skybox;
     }
 
+    public setPosition(position) {
+        this.skybox.position.x = position.x;
+        this.skybox.position.y = position.y;
+        this.skybox.position.z = position.z;
+    }
+
     public load() {
         this.loadMaterial();
-        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(100, 100, 100), this.material);
+        this.skybox = new this.THREE.Mesh(new this.THREE.BoxGeometry(500, 500, 500), this.material);
     }
 
     public loadMaterial() {
@@ -295,31 +287,6 @@ export class Skybox {
 
 }
 
-export class SkyboxCamera {
-    private camera: any;
-
-    public constructor(camera) {
-        this.camera = camera;
-    }
-
-    public getCamera() {
-        return this.camera;
-    }
-
-    public setCameraQuaternion(q) {
-        this.camera.setRotationFromQuaternion(q);
-    }
-
-    public setZoom(zoom: number) {
-        this.camera.zoom = zoom;
-        this.camera.updateProjectionMatrix();
-    }
-
-    public updateProjectionMatrix() {
-        this.camera.updateProjectionMatrix();
-    }
-    
-}
 export class SnowParticleSystem {
     private THREE;
     private particleCount = 2000;
