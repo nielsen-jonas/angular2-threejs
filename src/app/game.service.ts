@@ -269,7 +269,19 @@ export class Player {
         return this.headBody.quaternion;
     }
 
+    public updateBodyQuaternion() {
+      let q = this.camera.getCameraQuaternion();
+      this.headBody.quaternion.x = q.x;
+      this.headBody.quaternion.y = q.y;
+      this.headBody.quaternion.z = q.z;
+      this.headBody.quaternion.w = q.w;
+      this.midBody.quaternion.y = q.y;
+      this.midBody.quaternion.w = q.w;
+    }
+
     public step(step) {
+        this.updateBodyQuaternion();
+
       if (this.isOnGround()) {
           this.airTime = 0;
       } else {

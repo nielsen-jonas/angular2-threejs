@@ -26,6 +26,7 @@ export class SceneService {
         this.textureLoader = new this.THREE.TextureLoader();
         this.textures['sign-arrow'] = this.textureLoader.load('./assets/textures/sign_arrow.jpg');
         this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
+        this.textures['snow-1'] = this.textureLoader.load('./assets/textures/SnowIceTexture0006.jpg');
         
         this.cannonMaterials['generic'] = new this.CANNON.Material();
         this.cannonMaterials['concrete'] = new this.CANNON.Material();
@@ -35,6 +36,7 @@ export class SceneService {
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
+        this.threeMaterials['snow-1'] = new this.THREE.MeshLambertMaterial({ map: this.textures['snow-1']});
         this.threeMaterials['orange'] = new this.THREE.MeshLambertMaterial({ color: 0xffbd4a });
         this.threeMaterials['blue'] = new this.THREE.MeshLambertMaterial({ color: 0x2b50b3 });
 
@@ -52,7 +54,7 @@ export class SceneService {
         this.materials['player'] = new Material;
         this.materials['player'].setDensity(9.85);
         this.materials['player'].setCannonMaterial('player');
-        this.materials['player'].setThreeMaterial('sign-arrow');
+        this.materials['player'].setThreeMaterial('snow-1');
         
         // Player vs concrete
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['concrete'], {

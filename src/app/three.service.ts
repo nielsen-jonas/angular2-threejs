@@ -143,6 +143,7 @@ export class ThreeService {
     private running: boolean = false;
 
     private meshes: any[] = [];
+    private particleSystem: SnowParticleSystem;
 
     //private lensFlare: LensFlare;
 
@@ -165,18 +166,18 @@ export class ThreeService {
         //this.lensFlare = new LensFlare(this.THREE);
         //this.lensFlare.setPosition(directionalLight.position);
         //this.scene.add(this.lensFlare.getLensFlare());
+        //let particleSystem = this.createParticleSystem();
+        //this.scene.add(particleSystem);
+        this.particleSystem = new SnowParticleSystem(this.THREE);
+        this.scene.add(this.particleSystem.getParticleSystem());
+        
   }
 
     public getThree() {
         return this.THREE;
     }
 
-    public run() {
-        this.running = true;
-    }
-
-    public halt() {
-        this.running = false;
+    public run() { this.running = true; } public halt() { this.running = false;
     }
 
     public isRunning() {
@@ -234,6 +235,10 @@ export class ThreeService {
 
     public reloadSkybox() {
         this.skybox.reload();
+    }
+
+    public stepParticleSystem(step) {
+        this.particleSystem.step(step);
     }
 
 }
@@ -314,6 +319,57 @@ export class SkyboxCamera {
         this.camera.updateProjectionMatrix();
     }
     
+}
+export class SnowParticleSystem {
+    private THREE;
+    private particleCount = 2000;
+    private particles;
+    private particleMaterial;
+    private particleSystem;
+
+    public constructor(THREE) {
+        this.THREE = THREE;
+        this.initialize();
+    }
+
+    public getParticleSystem() {
+        return this.particleSystem;
+    }
+
+    private initialize() {
+        this.particles = new this.THREE.Geometry();
+        for (let p = 0; p < this.particleCount; p++) {
+            let x = Math.random() * 400 - 200;
+            let y = Math.random() * 400 - 200;
+            let z = Math.random() * 400 - 200;
+            
+            let particle = new this.THREE.Vector3(x, y, z);
+            this.particles.vertices.push(particle);
+        }
+        this.particleMaterial = new this.THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 1,
+            map: new this.THREE.TextureLoader().load('./assets/particles/snowflake.jpg'),
+            blending: this.THREE.AdditiveBlending,
+            transparent: true
+        });
+
+        this.particleSystem = new this.THREE.Points(this.particles, this.particleMaterial);
+    }
+
+    public step(step) {
+        let verts = this.particleSystem.geometry.vertices;
+        for (let i = 0; i < verts.length; i++) {
+            let vert = verts[i];
+            if (vert.y < -200) {
+                vert.y = Math.random() * 400 - 200;
+            }
+            vert.y = vert.y - (10 * step);
+        }
+        this.particleSystem.rotation.y -= .1 * step;
+        this.particleSystem.geometry.verticesNeedUpdate = true;
+    }
+
 }
 
 // export class LensFlare {

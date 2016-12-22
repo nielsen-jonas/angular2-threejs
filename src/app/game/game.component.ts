@@ -85,6 +85,7 @@ export class GameComponent implements OnInit {
           this.cannon.step(this.step, this.tickDelta/1000);
           //this.cannon.step(this.cannonStep, this.tickDelta/1000);
           this.scene.update();
+          this.three.stepParticleSystem(this.step);
           this.three.render();
           this.game.main(this.step);
           this.input.flush();
