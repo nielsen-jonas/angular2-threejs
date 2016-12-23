@@ -145,9 +145,10 @@ export class ThreeService {
         this.skybox = new Skybox(this.THREE);
         this.skybox.load();
         this.renderer = new this.THREE.WebGLRenderer({ alpha: true, antialias: true });
-        let ambientLight = new this.THREE.AmbientLight( 0x707070 );
+        //let ambientLight = new this.THREE.AmbientLight( 0x707070 );
+        let ambientLight = new this.THREE.AmbientLight( 0x808080 );
         this.scene.add( ambientLight );
-        let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .7 );
+        let directionalLight = new this.THREE.DirectionalLight( 0xfffdf8, .8 );
         directionalLight.position.set(1000,286,-162);
         this.scene.add( directionalLight );
         //this.lensFlare = new LensFlare(this.THREE);
@@ -157,6 +158,8 @@ export class ThreeService {
         //this.scene.add(particleSystem);
         this.particleSystem = new SnowParticleSystem(this.THREE);
         this.scene.add(this.particleSystem.getParticleSystem());
+        this.scene.fog = new this.THREE.Fog(0x99a6af, 10, 100);
+
         
   }
 

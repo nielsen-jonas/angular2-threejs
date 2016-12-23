@@ -27,11 +27,14 @@ export class SceneService {
         this.textures['sign-arrow'] = this.textureLoader.load('./assets/textures/sign_arrow.jpg');
         this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
         this.textures['snow-1'] = this.textureLoader.load('./assets/textures/SnowIceTexture0006.jpg');
+        this.textures['snow-ground'] = this.textureLoader.load('./assets/textures/SnowIceTexture0006.jpg');
+        this.textures['snow-ground'].wrapS = this.textures['snow-ground'].wrapT = this.THREE.RepeatWrapping;
+        this.textures['snow-ground'].repeat.set(64,64);
         this.textures['snowman-head'] = this.textureLoader.load('./assets/textures/snowman_head.jpg');
         
         this.cannonMaterials['generic'] = new CannonMaterialContainer(new this.CANNON.Material());
         this.cannonMaterials['concrete'] = new CannonMaterialContainer(new this.CANNON.Material());
-        this.cannonMaterials['concrete'].setFriction(.1);
+        this.cannonMaterials['concrete'].setFriction(.16);
         this.cannonMaterials['concrete'].setRestitution(0);
         this.cannonMaterials['concrete'].setDensityReal(2515);
         this.cannonMaterials['soccer-ball'] = new CannonMaterialContainer(new this.CANNON.Material());
@@ -52,8 +55,18 @@ export class SceneService {
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
-        this.threeMaterials['snow-1'] = new this.THREE.MeshLambertMaterial({ map: this.textures['snow-1']});
-        this.threeMaterials['snowman-head'] = new this.THREE.MeshLambertMaterial({ map: this.textures['snowman-head']});
+        this.threeMaterials['snow-1'] = new this.THREE.MeshLambertMaterial({
+            map: this.textures['snow-1'],
+            color: 0xf2f5f7
+        });
+        this.threeMaterials['snow-ground'] = new this.THREE.MeshLambertMaterial({
+            map: this.textures['snow-ground'],
+            color: 0xf2f5f7
+        });
+        this.threeMaterials['snowman-head'] = new this.THREE.MeshLambertMaterial({
+            map: this.textures['snowman-head'],
+            color: 0xf2f5f7
+        });
         this.threeMaterials['orange'] = new this.THREE.MeshLambertMaterial({ color: 0xffbd4a });
         this.threeMaterials['blue'] = new this.THREE.MeshLambertMaterial({ color: 0x2b50b3 });
 
@@ -75,6 +88,9 @@ export class SceneService {
         this.materials['snow'] = new Material;
         this.materials['snow'].setCannonMaterialRef('snow');
         this.materials['snow'].setThreeMaterialRef('snow-1');
+        this.materials['snow-ground'] = new Material;
+        this.materials['snow-ground'].setCannonMaterialRef('snow');
+        this.materials['snow-ground'].setThreeMaterialRef('snow-ground');
 
         // Player vs player 
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
@@ -107,9 +123,17 @@ export class SceneService {
                 let restitutionA = this.cannonMaterials[combinations[i][0]].getRestitution();
                 let restitutionB = this.cannonMaterials[combinations[i][1]].getRestitution();
                 let restitution = (restitutionA + restitutionB)*.5;
+                let stiffnessA = this.cannonMaterials[combinations[i][0]].getContactEquationStiffness();
+                let stiffnessB = this.cannonMaterials[combinations[i][1]].getContactEquationStiffness();
+                let stiffness = (stiffnessA + stiffnessB)*.5;
+                let softnessA = this.cannonMaterials[combinations[i][0]].getContactEquationRegularizationTime();
+                let softnessB = this.cannonMaterials[combinations[i][1]].getContactEquationRegularizationTime();
+                let softness = (softnessA + softnessB)*.5;
                 this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials[combinations[i][0]], this.cannonMaterials[combinations[i][1]], {
                     friction: friction,
-                    restitution: restitution
+                    restitution: restitution,
+                    contactEquationStiffness: stiffness,
+                    contactEquationReqularizatinoTime: softness // Larger value => softer contact
                 }));
             }
         }
@@ -391,6 +415,8 @@ export class CannonMaterialContainer {
     private restitution: number = 0.3;
     private density: number = 1;
     private weight: number;
+    private contactEquationStiffness: number = 1e8; // contactEquationStiffness
+    private contactEquationRegularizationTime: number = 1; // contactEquationRegularizationTime, Larger value => softer contact
 
     constructor(material) {
         this.material = material;
@@ -416,6 +442,14 @@ export class CannonMaterialContainer {
         return this.restitution;
     }
 
+    public getContactEquationStiffness(): number {
+        return this.contactEquationStiffness;
+    }
+
+    public getContactEquationRegularizationTime(): number {
+        return this.contactEquationStiffness;
+    }
+
     public setDensity(density: number) {
         this.density = density;
     }
@@ -434,6 +468,14 @@ export class CannonMaterialContainer {
 
     public setRestitution(restitution: number) {
         this.restitution = restitution;
+    }
+
+    public setContactEquationStiffness(stiffness: number) {
+        this.contactEquationStiffness = stiffness;
+    }
+
+    public setContactEquationReqularizationTime(time: number) {
+        this.contactEquationRegularizationTime = time;
     }
 }
 

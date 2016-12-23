@@ -31,7 +31,6 @@ export class Player {
     private headRadius: number = .2;
     private midRadius: number = .25;
     private feetRadius: number = .3;
-    //private partsDistance: number = .02;
     private partsDistance: number = .05;
     
     private strength: number;
@@ -110,16 +109,6 @@ export class Player {
         this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
             10);
 
-        // this.cannon.coneTwistConstraintById(this.feetId, this.midId, {
-        //     maxForce: 10,
-        //     pivotA: new this.CANNON.Vec3(0, -this.midRadius-this.partsDistance/2, 0),
-        //     pivotB: new this.CANNON.Vec3(0, this.feetRadius, 0)});
-
-        // this.cannon.coneTwistConstraintById(this.midId, this.headId, {
-        //     maxForce: 10,
-        //     pivotA: new this.CANNON.Vec3(0, -this.headRadius-this.partsDistance/2, 0),
-        //     pivotB: new this.CANNON.Vec3(0, this.midRadius, 0)});
-
         this.initialized = true;
     }
 
@@ -175,8 +164,8 @@ export class Player {
             position: [this.headBody.position.x, this.headBody.position.y+this.headRadius+.15, this.headBody.position.z],
             rotation: [direction.x, direction.y, direction.z],
             velocity: [this.charge*direction.x, this.charge*direction.y+3, this.charge*direction.z],
-            radius: 0.12,
-            material: 'soccer-ball'
+            radius: 0.08,
+            material: 'snow'
         }));
     }
 
@@ -271,16 +260,17 @@ export class Player {
 
     public updateBodyQuaternion() {
       let q = this.camera.getCameraQuaternion();
-      this.headBody.quaternion.x = q.x;
-      this.headBody.quaternion.y = q.y;
-      this.headBody.quaternion.z = q.z;
-      this.headBody.quaternion.w = q.w;
+      this.headBody.quaternion.set( q.x, q.y, q.z, q.w );
+      
+
       this.midBody.quaternion.y = q.y;
       this.midBody.quaternion.w = q.w;
     }
 
     public step(step) {
-        this.updateBodyQuaternion();
+        if (this.fpsCameraMode) {
+            this.updateBodyQuaternion();
+        }
 
       if (this.isOnGround()) {
           this.airTime = 0;

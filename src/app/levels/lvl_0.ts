@@ -6,11 +6,19 @@ export let lvl0Init = function() {
         z: 0 
     };
 
+    // // Ground
+    // this.objects.push(this.scene.createCylinder({
+    //     position: [0,-5,0],
+    //     height: 1,
+    //     radius: 500,
+    //     material: 'snow-ground',
+    //     static: true
+    // }));
     // Cylinder
     this.assoc['cylinder'] = this.scene.createCylinder({
-        position: [35,47,0],
+        position: [20,25,0],
         rotation: [1,0,0],
-        velocity: [-10,0,0],
+        velocity: [-8,0,0],
         radius: 1.4,
         height: 4,
         material: 'concrete',
