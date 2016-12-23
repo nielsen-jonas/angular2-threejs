@@ -88,7 +88,7 @@ export class Player {
                 position.y+this.feetRadius+this.midRadius*2+this.headRadius+this.partsDistance*2,
                 position.z],
             radius: this.headRadius,
-            material: 'player',
+            material: 'player-head',
             angularDamping: angDamp,
             linearDamping: linDamp,
             fixedRotation: true,

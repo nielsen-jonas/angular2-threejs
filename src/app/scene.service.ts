@@ -27,6 +27,7 @@ export class SceneService {
         this.textures['sign-arrow'] = this.textureLoader.load('./assets/textures/sign_arrow.jpg');
         this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
         this.textures['snow-1'] = this.textureLoader.load('./assets/textures/SnowIceTexture0006.jpg');
+        this.textures['snowman-head'] = this.textureLoader.load('./assets/textures/snowman_head.jpg');
         
         this.cannonMaterials['generic'] = new CannonMaterialContainer(new this.CANNON.Material());
         this.cannonMaterials['concrete'] = new CannonMaterialContainer(new this.CANNON.Material());
@@ -52,6 +53,7 @@ export class SceneService {
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
         this.threeMaterials['snow-1'] = new this.THREE.MeshLambertMaterial({ map: this.textures['snow-1']});
+        this.threeMaterials['snowman-head'] = new this.THREE.MeshLambertMaterial({ map: this.textures['snowman-head']});
         this.threeMaterials['orange'] = new this.THREE.MeshLambertMaterial({ color: 0xffbd4a });
         this.threeMaterials['blue'] = new this.THREE.MeshLambertMaterial({ color: 0x2b50b3 });
 
@@ -67,6 +69,9 @@ export class SceneService {
         this.materials['player'] = new Material;
         this.materials['player'].setCannonMaterialRef('player');
         this.materials['player'].setThreeMaterialRef('snow-1');
+        this.materials['player-head'] = new Material;
+        this.materials['player-head'].setCannonMaterialRef('player');
+        this.materials['player-head'].setThreeMaterialRef('snowman-head');
         this.materials['snow'] = new Material;
         this.materials['snow'].setCannonMaterialRef('snow');
         this.materials['snow'].setThreeMaterialRef('snow-1');
@@ -275,10 +280,10 @@ export class SceneService {
                 mass = conf.weight;
             } else if (typeof conf.density != 'undefined' && conf.density.isInteger()) {
                 mass = conf.density * volume;
-            } else if (typeof this.cannonMaterials[conf.material].getWeight() != 'undefined') {
-                mass = this.cannonMaterials[conf.material].getWeight();
+            } else if (typeof this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()].getWeight() != 'undefined') {
+                mass = this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()].getWeight();
             } else {
-                mass = this.cannonMaterials[conf.material].getDensity() * volume;
+                mass = this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()].getDensity() * volume;
             }
         }
         return mass;
