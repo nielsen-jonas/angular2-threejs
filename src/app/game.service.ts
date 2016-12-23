@@ -39,11 +39,11 @@ export class Player {
     private chargeMax: number = 20;
     private _fireChargeFillMultiplier: number = 20;
     private charge: number = this.chargeMin;
-    private _jumpChargeMin: number = 350;
-    private _jumpChargeMax: number = 550;
-    private _jumpChargeFillMultiplier: number = 200;
+    private _jumpChargeMin: number = 200;
+    private _jumpChargeMax: number = 300;
+    private _jumpChargeFillMultiplier: number = 100;
     private jumpCharge: number = this._jumpChargeMin;
-    private _moveSpeed = 120; 
+    private _moveSpeed = 90; 
     private moveSpd = 0;
     private moveSpd2 = 0;
     private airTime = 0;

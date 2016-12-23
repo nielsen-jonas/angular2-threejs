@@ -28,11 +28,26 @@ export class SceneService {
         this.textures['concrete'] = this.textureLoader.load('./assets/textures/concrete.jpg');
         this.textures['snow-1'] = this.textureLoader.load('./assets/textures/SnowIceTexture0006.jpg');
         
-        this.cannonMaterials['generic'] = new this.CANNON.Material();
-        this.cannonMaterials['concrete'] = new this.CANNON.Material();
-        this.cannonMaterials['soccer-ball'] = new this.CANNON.Material();
-        this.cannonMaterials['spring'] = new this.CANNON.Material();
-        this.cannonMaterials['player'] = new this.CANNON.Material();
+        this.cannonMaterials['generic'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['concrete'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['concrete'].setFriction(.1);
+        this.cannonMaterials['concrete'].setRestitution(0);
+        this.cannonMaterials['concrete'].setDensityReal(2515);
+        this.cannonMaterials['soccer-ball'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['soccer-ball'].setFriction(.01);
+        this.cannonMaterials['soccer-ball'].setRestitution(.04);
+        this.cannonMaterials['soccer-ball'].setWeight(.0045);
+        this.cannonMaterials['spring'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['spring'].setFriction(.1);
+        this.cannonMaterials['spring'].setRestitution(1.8);
+        this.cannonMaterials['player'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['player'].setFriction(.1);
+        this.cannonMaterials['player'].setRestitution(0);
+        this.cannonMaterials['player'].setDensityReal(500);
+        this.cannonMaterials['snow'] = new CannonMaterialContainer(new this.CANNON.Material());
+        this.cannonMaterials['snow'].setFriction(.01);
+        this.cannonMaterials['snow'].setRestitution(0);
+        this.cannonMaterials['snow'].setDensityReal(500);
 
         this.threeMaterials['sign-arrow'] = new this.THREE.MeshLambertMaterial({ map: this.textures['sign-arrow']});
         this.threeMaterials['concrete'] = new this.THREE.MeshLambertMaterial({ map: this.textures['concrete']});
@@ -41,62 +56,20 @@ export class SceneService {
         this.threeMaterials['blue'] = new this.THREE.MeshLambertMaterial({ color: 0x2b50b3 });
 
         this.materials['soccer-ball'] = new Material;
-        this.materials['soccer-ball'].setWeight(.45);
-        this.materials['soccer-ball'].setCannonMaterial('soccer-ball');
-        this.materials['soccer-ball'].setThreeMaterial('sign-arrow');
+        this.materials['soccer-ball'].setCannonMaterialRef('soccer-ball');
+        this.materials['soccer-ball'].setThreeMaterialRef('sign-arrow');
         this.materials['concrete'] = new Material;
-        this.materials['concrete'].setDensity(25.15);
-        this.materials['concrete'].setCannonMaterial('concrete');
-        this.materials['concrete'].setThreeMaterial('concrete');
+        this.materials['concrete'].setCannonMaterialRef('concrete');
+        this.materials['concrete'].setThreeMaterialRef('concrete');
         this.materials['spring'] = new Material;
-        this.materials['spring'].setCannonMaterial('spring');
-        this.materials['spring'].setThreeMaterial('orange');
+        this.materials['spring'].setCannonMaterialRef('spring');
+        this.materials['spring'].setThreeMaterialRef('orange');
         this.materials['player'] = new Material;
-        this.materials['player'].setDensity(9.85);
-        this.materials['player'].setCannonMaterial('player');
-        this.materials['player'].setThreeMaterial('snow-1');
-        
-        // Player vs concrete
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['concrete'], {
-            friction: 0.1,
-            restitution: 0.0
-        }));
-        
-        // Concrete vs concrete
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['concrete'], {
-            friction: 0.08,
-            restitution: 0.0
-        }));
-
-        // Soccer ball vs soccer ball
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['soccer-ball'], {
-            friction: 0.1,
-            restitution: 0.4
-        }));
-        
-        // Concrete vs soccer ball
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['soccer-ball'], {
-            friction: 0.1,
-            restitution: 0.4
-        }));
-
-        // Soccer ball vs spring
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['soccer-ball'], this.cannonMaterials['spring'], {
-            friction: 0.1,
-            restitution: 1.8 
-        }));
-        
-        // Concrete vs spring
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['concrete'], this.cannonMaterials['spring'], {
-            friction: 0.1,
-            restitution: 1.8 
-        }));
-
-        // Player vs spring
-        this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
-            friction: 0.1,
-            restitution: 1.8 
-        }));
+        this.materials['player'].setCannonMaterialRef('player');
+        this.materials['player'].setThreeMaterialRef('snow-1');
+        this.materials['snow'] = new Material;
+        this.materials['snow'].setCannonMaterialRef('snow');
+        this.materials['snow'].setThreeMaterialRef('snow-1');
 
         // Player vs player 
         this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials['player'], this.cannonMaterials['spring'], {
@@ -104,6 +77,37 @@ export class SceneService {
             restitution: 0.0
         }));
 
+        // Autmatically generate contact materials for every contact combination
+        let ignoreCombinations = [
+            ['player', 'player'],
+            //['player', 'concrete'],
+        ];
+
+        let combinations = uniqueCombinations(this.cannonMaterials);
+        for (let i = 0, len = combinations.length; i < len; i++) {
+            let accepted = true;
+            for (let _i = 0, _len = ignoreCombinations.length; _i < _len; _i++) {
+                let ignore = ignoreCombinations[_i];
+                let combination = combinations[i];
+                if (
+                    (ignore[0] === combination[0] && ignore[1] === combination[1]) ||
+                    (ignore[1] === combination[0] && ignore[0] === combination[1])) {
+                    accepted = false;
+                }
+            }
+            if (accepted) {
+                let frictionA = this.cannonMaterials[combinations[i][0]].getFriction();
+                let frictionB = this.cannonMaterials[combinations[i][1]].getFriction();
+                let friction = (frictionA + frictionB)*.5;
+                let restitutionA = this.cannonMaterials[combinations[i][0]].getRestitution();
+                let restitutionB = this.cannonMaterials[combinations[i][1]].getRestitution();
+                let restitution = (restitutionA + restitutionB)*.5;
+                this.cannonContactMaterials.push(new this.CANNON.ContactMaterial(this.cannonMaterials[combinations[i][0]], this.cannonMaterials[combinations[i][1]], {
+                    friction: friction,
+                    restitution: restitution
+                }));
+            }
+        }
 
         // Tune contacts
         for (let i = 0, len = this.cannonContactMaterials.length; i < len; i++) {
@@ -114,6 +118,7 @@ export class SceneService {
         // Send contacts to cannon
         this.addContactMaterials(this.cannonContactMaterials);
     }
+
 
     public clear() {
         for (let i = 0, len = this.objects.length; i < len; i++) {
@@ -142,7 +147,7 @@ export class SceneService {
         let mass = this.calculateMass(conf, shape.volume());
         
         let body = new this.CANNON.Body({
-            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()],
             mass: mass,
             shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
@@ -159,7 +164,7 @@ export class SceneService {
 
         // Three Mesh
         let geometry = new this.THREE.BoxGeometry(conf.dimensions[0]*2, conf.dimensions[1]*2, conf.dimensions[2]*2);
-        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterialRef()]);
         
         return this.instantiate(body, mesh);
     }
@@ -178,7 +183,7 @@ export class SceneService {
         shape.transformAllPoints(translation, quat);
 
         let body = new this.CANNON.Body({
-            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()],
             mass: mass,
             shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
@@ -196,7 +201,7 @@ export class SceneService {
 
         // Three Mesh
         let geometry = new this.THREE.CylinderGeometry(conf.radiusTop, conf.radiusBottom, conf.height, conf.radiusSegments);
-        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterialRef()]);
 
         return this.instantiate(body, mesh);
     }
@@ -209,7 +214,7 @@ export class SceneService {
         let mass = this.calculateMass(conf, shape.volume());
 
         let body = new this.CANNON.Body({
-            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterial()],
+            material: this.cannonMaterials[this.materials[conf.material].getCannonMaterialRef()],
             mass: mass,
             shape: shape,
             position: new this.CANNON.Vec3(conf.position[0], conf.position[1], conf.position[2]),
@@ -226,7 +231,7 @@ export class SceneService {
         
         // Three Mesh
         let geometry = new this.THREE.SphereGeometry(conf.radius, 16, 16);
-        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterial()]);
+        let mesh = new this.THREE.Mesh(geometry, this.threeMaterials[this.materials[conf.material].getThreeMaterialRef()]);
 
         return this.instantiate(body, mesh);
     };
@@ -270,10 +275,10 @@ export class SceneService {
                 mass = conf.weight;
             } else if (typeof conf.density != 'undefined' && conf.density.isInteger()) {
                 mass = conf.density * volume;
-            } else if (typeof this.materials[conf.material].getWeight() != 'undefined') {
-                mass = this.materials[conf.material].getWeight();
+            } else if (typeof this.cannonMaterials[conf.material].getWeight() != 'undefined') {
+                mass = this.cannonMaterials[conf.material].getWeight();
             } else {
-                mass = this.materials[conf.material].getDensity() * volume;
+                mass = this.cannonMaterials[conf.material].getDensity() * volume;
             }
         }
         return mass;
@@ -354,41 +359,95 @@ export class SceneService {
 }
 
 export class Material {
-    //private density: number = 2000;
+    private cannonMaterialRef: string = 'generic';
+    private threeMaterialRef: string = 'generic';
+
+    public getCannonMaterialRef() {
+        return this.cannonMaterialRef;
+    }
+
+    public getThreeMaterialRef() {
+        return this.threeMaterialRef;
+    }
+
+    public setCannonMaterialRef(materialRef: string) {
+        this.cannonMaterialRef = materialRef;
+    }
+
+    public setThreeMaterialRef(materialRef: string) {
+        this.threeMaterialRef = materialRef;
+    }
+
+}
+
+export class CannonMaterialContainer {
+    private material;
+    private friction: number = 0.3;
+    private restitution: number = 0.3;
     private density: number = 1;
     private weight: number;
-    private cannonMaterial: string = 'generic';
-    private threeMaterial: string = 'generic';
 
-    public getDensity() {
+    constructor(material) {
+        this.material = material;
+    }
+
+    public getMaterial() {
+        return this.material;
+    }
+
+    public getDensity(): number {
         return this.density;
     }
 
-    public getWeight() {
+    public getWeight(): number {
         return this.weight;
     }
 
-    public getCannonMaterial() {
-        return this.cannonMaterial;
+    public getFriction(): number {
+        return this.friction;
     }
 
-    public getThreeMaterial() {
-        return this.threeMaterial;
+    public getRestitution(): number {
+        return this.restitution;
     }
 
     public setDensity(density: number) {
         this.density = density;
     }
 
+    public setDensityReal(density: number) {
+        this.density = density/100;
+    }
+
     public setWeight(weight: number) {
         this.weight = weight;
     }
 
-    public setCannonMaterial(material: string) {
-        this.cannonMaterial = material;
+    public setFriction(friction: number) {
+        this.friction = friction;
     }
 
-    public setThreeMaterial(material: string) {
-        this.threeMaterial = material;
+    public setRestitution(restitution: number) {
+        this.restitution = restitution;
     }
+}
+
+function uniqueCombinations(array) {
+    let combined = [];
+    for (let key1 in array) {
+        for (let key2 in array) {
+            let combination = [key1, key2].sort();
+            let unique = true;
+            for (let i = 0, len = combined.length; i < len; i++) {
+                if (combined[i][0] === combination[0] && combined[i][1] === combination[1]) {
+                    unique = false;
+                    break;
+                }
+            }
+            if (unique) {
+                combined.push(combination);
+            }
+        }
+    }
+    return combined;
 }
