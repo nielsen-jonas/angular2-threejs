@@ -125,6 +125,14 @@ export class Player {
         return this.ballObjects;
     }
 
+    getBallBodies() {
+        let bodies = [];
+        for (let i = 0, len = this.ballObjects.length; i < len; i++) {
+           bodies.push(this.cannon.getBodyById(this.ballObjects[i][0])); 
+        }
+        return bodies;
+    }
+
     // TODO: Find out why updating removed balls results in 'Uncaught TypeError' on clearBalls()
     public removeBall(object) {
         for (let i = 0, len = this.ballObjects.length; i < len; i++) {
