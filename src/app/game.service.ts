@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter, Output } from '@angular/core';
 import { CannonService } from './cannon.service';
 import { ThreeService, Camera } from './three.service';
 import { SceneService } from './scene.service';
@@ -436,6 +436,8 @@ export class GameService {
       }
 
       private level: Level[] = [];
+      private hasWon = false;
+      @Output() private hasWonEmitter: EventEmitter<any> = new EventEmitter;
 
   public initialize() {
       this.cannon.setGravity(0,-9.8,0);
@@ -446,6 +448,10 @@ export class GameService {
       //this.player.initialize([-2.5, 50, 6.5]);
       let startPos = this.level[0].getStartingPosition();
       this.player.initialize(startPos);
+  }
+
+  public getHasWonEmitter() {
+      return this.hasWonEmitter;
   }
 
   public main(step) {
@@ -494,6 +500,14 @@ export class GameService {
           this.player.initialize(this.level[0].getStartingPosition());
       }
       this.level[0].step(step);
+
+      // Check level win
+      if (!this.hasWon) {
+          if (this.level[0].isComplete()) {
+              this.hasWon = true;
+              this.hasWonEmitter.emit(this.level[0]);
+          }
+      }
   }
 
 }
@@ -560,5 +574,9 @@ export class Level {
     }
     public getStartingPosition() {
         return this.startingPosition;
+    }
+
+    public win() {
+        this.completed = true;
     }
 }

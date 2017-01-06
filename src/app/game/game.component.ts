@@ -31,6 +31,9 @@ export class GameComponent implements OnInit {
   private avgFps: AvgFps = new AvgFps;
   private resized: boolean = false;
 
+  private hasWonListener;
+  private hasWon = false;
+
 
   constructor(
       el: ElementRef,
@@ -61,6 +64,10 @@ export class GameComponent implements OnInit {
       this.element.appendChild(this.three.getDomElement());
       //this.tickInterval = setInterval(() => { this.tick(); }, (this.step)*1000);
       this.requestTick();
+
+      this.hasWonListener = this.game.getHasWonEmitter().subscribe((level) => {
+          this.hasWon = true;
+      });
   }
 
   private requestTick() {

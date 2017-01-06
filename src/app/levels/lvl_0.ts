@@ -66,19 +66,33 @@ export let lvl0Init = function() {
 }
 
 export let lvl0Loop = function (step) {
+    if (this.memory['point-a']) {
+        this.win();
+    }
     //console.log(this.player.getBalls().length);
     //console.log(this.player.getBallBodies());
-    if (this.memory['meteorite-clock'] <= 0) {
-        this.memory['meteorite-clock'] = .1*getRandomInt(1,10);
-        let x = getRandomInt(20,100);
-        let z = getRandomInt(-20,20);
-        this.objects.push(this.scene.createSphere({
-            position: [x,200,z],
-            radius: getRandomInt(1,2),
-            velocity: [-20, 0, 0],
-            material: 'concrete'
-        }));
-    } else { this.memory['meteorite-clock'] -= step }
+    //console.log(this.player.getMidPosition());
+    if (!this.memory['point-a']) {
+        if (this.memory['meteorite-clock'] <= 0) {
+            this.memory['meteorite-clock'] = .1*getRandomInt(1,10);
+            let x = getRandomInt(20,100);
+            let z = getRandomInt(-20,20);
+            this.objects.push(this.scene.createSphere({
+                position: [x,200,z],
+                radius: getRandomInt(1,2),
+                velocity: [-20, 0, 0],
+                material: 'concrete'
+            }));
+        } else { this.memory['meteorite-clock'] -= step }
+        
+        let position = this.player.getMidPosition();
+        if (
+            position.x <= -60 && position.x >= -80 &&
+            position.z >= -5 && position.z <= 5 &&
+            position.y >= 0 && position.y <= 10) {
+            this.memory['point-a'] = true;
+        }
+    }
 }
 
 function getRandomInt(min: number, max: number) {

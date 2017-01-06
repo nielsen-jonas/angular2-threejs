@@ -3,6 +3,7 @@
     <div id="crosshair">&#x268b;</div>
     <p id="author" class="hidden-xs">2016 Jonas Nielsen</p>
 </div>
+<alert *ngIf="hasWon" dismissible="true" type="success">Awesome! Thank's for playing :)</alert>
 <div class="row">
     <div class="col-xs-8">
         <p>FPS: <var [ngClass]="{'text-danger': getFpsFiltered() < 30}">{{ getFpsFiltered() }}</var></p>
