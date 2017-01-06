@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter, Output } from '@angular/core';
 import { CannonService } from './cannon.service';
 import { ThreeService } from './three.service';
 
@@ -10,6 +10,7 @@ export class SceneService {
 
     private objects: any[] = [];
     private objectCount: number = 0;
+    @Output() private objectRemoved: EventEmitter<any> = new EventEmitter;
 
     private textureLoader: any;
     private textures: any[] = [];
@@ -368,9 +369,14 @@ export class SceneService {
             this.three.removeMesh(object[1]);
             this.objects.splice(index, 1);
             this.objectCount --;
+            this.objectRemoved.emit(object);
             return true;
         }
         return false;
+    }
+
+    public getObjectRemovedEmitter() {
+        return this.objectRemoved;
     }
 
     private instantiate(body, mesh) {

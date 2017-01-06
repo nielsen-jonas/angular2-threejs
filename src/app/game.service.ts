@@ -19,6 +19,7 @@ export class Player {
     private midBody: any;
     private feetBody: any;
     private ballObjects: any[] = [];
+    private objectRemovedSubscription;
 
     private camPos = {
         x: 0,
@@ -52,6 +53,7 @@ export class Player {
 
     constructor(private input: InputService, private mouse: MouseService, private scene: SceneService, private camera: Camera, private cannon: CannonService) {
         this.CANNON = cannon.getCannon();
+        this.objectRemovedSubscription = this.scene.getObjectRemovedEmitter().subscribe(object => this.removeBall(object));
     }
 
     public initialize(position = {x: 0, y: 0, z: 0}) {
@@ -117,6 +119,20 @@ export class Player {
             this.scene.removeObjectByBodyId(this.ballObjects[i][0]);
         }
         this.ballObjects = [];
+    }
+
+    public getBalls() {
+        return this.ballObjects;
+    }
+
+    // TODO: Find out why updating removed balls results in 'Uncaught TypeError' on clearBalls()
+    public removeBall(object) {
+        for (let i = 0, len = this.ballObjects.length; i < len; i++) {
+            if (object[0] == this.ballObjects[i][0]) {
+                this.ballObjects.splice(i, 1);
+                break;
+            }
+        }
     }
 
     public destroy() {
@@ -448,7 +464,7 @@ export class GameService {
       // delete fallen objects
       for (let i = 0, len = this.bodies.length; i < len; i++) {
           if (typeof this.bodies[i] !== 'undefined') {
-              if (this.bodies[i].position.y < -1000) {
+              if (this.bodies[i].position.y < -200) {
                   this.scene.removeObjectByBodyId(i);
               }
           }
