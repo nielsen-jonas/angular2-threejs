@@ -67,6 +67,7 @@ export let lvl0Init = function() {
 
 export let lvl0Loop = function (step) {
     //console.log(this.player.getBalls().length);
+    //console.log(this.player.getBallBodies());
     if (this.memory['meteorite-clock'] <= 0) {
         this.memory['meteorite-clock'] = .1*getRandomInt(1,10);
         let x = getRandomInt(20,100);
