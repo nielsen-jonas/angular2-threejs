@@ -1,20 +1,19 @@
 export let lvl0Init = function() {
     this.memory['meteorite-clock'] = 0;
+    this.memory['point-a'] = false;
     this.startingPosition = {
         x: 0,
-        y: 18,
-        z: 0 
+        y: 5,
+        z: 40 
     };
 
-    // // Ground
-    // this.objects.push(this.scene.createCylinder({
-    //     position: [0,-5,0],
-    //     height: 1,
-    //     radius: 500,
-    //     material: 'snow-ground',
-    //     static: true
-    // }));
-    // Cylinder
+    this.objects.push(this.scene.createBox({
+        position: [0, 0, 25],
+        dimensions: [4, .3, 16],
+        static: true,
+        material: 'concrete'
+    }));
+
     this.assoc['cylinder'] = this.scene.createCylinder({
         position: [20,25,0],
         rotation: [1,0,0],
