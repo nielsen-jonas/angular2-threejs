@@ -408,7 +408,7 @@ export class GameService {
       private input: InputService,
       private mouse: MouseService,
       private player: Player) {
-          this.level.push(new Level(this.scene, lvl0Init, lvl0Loop));
+          this.level.push(new Level(this.scene, lvl0Init, lvl0Loop, this.player));
       }
 
       private level: Level[] = [];
@@ -488,11 +488,14 @@ export class Level {
         y: 0,
         z: 0 
     };
+    private player: Player;
 
-    constructor(scene, init, loop) {
+    constructor(scene, init, loop, player) {
         this.scene = scene;
         this.init = init;
         this.loop = loop;
+        this.player = player;
+
     }
 
     public initialize() {
